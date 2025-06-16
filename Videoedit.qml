@@ -2,10 +2,10 @@ import QtQuick
 import QtQuick.Controls
 
 ApplicationWindow {
-    width: 640
-    height: 480
+    width: 600
+    height: 400
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("Hello Bx")
     menuBar: MenuBar {
         Menu {
             title: qsTr("File")
@@ -22,7 +22,7 @@ ApplicationWindow {
 
     //Content Area
     TextArea {
-        text: qsTr("Hello World")
+        text: qsTr("Hello Bx")
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
     }
