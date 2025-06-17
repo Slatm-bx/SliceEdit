@@ -7,7 +7,7 @@ project(
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia)
 
 qt_standard_project_setup(REQUIRES 6.9)
 
@@ -23,14 +23,23 @@ qt_add_qml_module(
   main.cpp
   QML_FILES
   Main.qml
-  QML_FILES Content.qml
-  QML_FILES Actions.qml
-  QML_FILES Dialogs.qml
-  QML_FILES Player.qml)
+  QML_FILES
+  Content.qml
+  QML_FILES
+  Actions.qml
+  QML_FILES
+  Dialogs.qml
+  QML_FILES
+  Player.qml
+  SOURCES
+  SOURCES
+  SOURCES
+  videoshot.h
+  videoshot.cpp)
 
 target_compile_features(appVideoedit PRIVATE cxx_std_23)
 
-target_link_libraries(appVideoedit PRIVATE Qt6::Quick)
+target_link_libraries(appVideoedit PRIVATE Qt6::Quick Qt6::Multimedia)
 
 set_target_properties(
   appVideoedit

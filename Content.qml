@@ -2,6 +2,7 @@ import QtQuick
 import QtMultimedia
 import QtQuick.Layouts
 import QtQuick.Controls
+import Videoedit
 
 Item {
     id:content
@@ -24,12 +25,19 @@ Item {
         anchors.right: parent.right
         anchors.top:parent.top
     }
+    Image{
+        width: 500
+        height: 500
+        id:silderImage
+        source: "file:///disk/F/pictures/IMG_20230725_225603_071.jpg"
+    }
 
     Dialogs{
         id:_dialogs
         fileOpen{
             onAccepted: {
                 player.source=fileOpen.selectedFile
+                videoshot.source=fileOpen.selectedFile
             }
             onRejected: {
                 console.log("Error:read video file")
@@ -37,6 +45,7 @@ Item {
             }
         }
     }
+
     Rectangle{
         id:rec
         height: 40
@@ -77,13 +86,17 @@ Item {
 
                 onMoved: {//仅在拖动时触发
                     player.position=value
+                    videoshot.spacing=value
                 }
                 enabled: content.player.source!=""
             }
         }
     }
 
+    VideoShot{
+        id:videoshot
 
+    }
 
 
 }
