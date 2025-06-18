@@ -39,7 +39,8 @@ qt_add_qml_module(
 
 target_compile_features(appVideoedit PRIVATE cxx_std_23)
 
-target_link_libraries(appVideoedit PRIVATE Qt6::Quick Qt6::Multimedia)
+target_link_libraries(appVideoedit PRIVATE Qt6::Quick Qt6::Multimedia avutil
+                                           avformat avcodec swscale)
 
 set_target_properties(
   appVideoedit

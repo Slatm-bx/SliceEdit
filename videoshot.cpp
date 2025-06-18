@@ -1,19 +1,22 @@
 #include "videoshot.h"
-#include <QtMultimedia/QMediaPlayer>
-#include <QtMultimedia/QVideoFrame>
-#include <QtMultimedia/QVideoSink>
 #include <iostream>
+
+extern "C" {
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libswscale/swscale.h" //格式转换库
+#include "libavutil/imgutils.h"
+}
 
 VideoShot::VideoShot(
     QObject *parent)
     : QObject{parent}
-    , m_player(new QMediaPlayer(this))
-    , m_sink(new QVideoSink(this))
 
+{}
+
+VideoShot::~VideoShot()
 {
-    m_spacing = 0;
-
-    m_player->setVideoSink(m_sink);
+    avformat_close_input(&m_fmt_ctx);
 }
 
 QUrl VideoShot::source() const
@@ -26,47 +29,150 @@ void VideoShot::setSource(
 {
     m_source = source;
     emit sourceChanged();
-    m_player->setSource(source);
-}
+    std::cout << source.toLocalFile().toStdString() << std::endl;
+    //TODO 验证是否需要打开前释放
 
-int VideoShot::spacing() const
-{
-    return m_spacing;
-}
-
-void VideoShot::setSpacing(
-    const int spacing)
-{
-    m_spacing = spacing;
-    emit spacingChanged();
-    std::cerr << "spacing:" << spacing << "\n";
-
-    if (!m_source.isEmpty()) {
-        m_player->setPosition(m_spacing);
-        m_player->play();
-        QVideoFrame frame = m_sink->videoFrame();
-        if (frame.isValid())
-            std::cerr << "frame有效\n";
-        else
-            std::cerr << "frame无效\n";
-        if (frame.map(QVideoFrame::ReadOnly)) {
-            QImage image = frame.toImage();
-            image.save("/disk/F/project/Image/output.jpg", "JPEG", 90);
-            std::cerr << "/disk/F/project/Image/output.jpg\n";
-
-            frame.unmap();
-        } else {
-            std::cerr << "frame map失败\n";
-        }
-        m_player->pause();
+    if (avformat_open_input(&m_fmt_ctx, source.toLocalFile().toStdString().c_str(), nullptr, nullptr)
+        < 0) {
+        std::cerr << "无法打开输入文件\n";
     }
 }
 
-// QImage VideoShot::image() const
-// {
-//     if (m_source.isEmpty())
-//         return QImage();
-//     m_player->setPosition(m_spacing);
-//     QVideoFrame frame = m_sink->videoFrame();
-//     return frame.toImage();
-// }
+void VideoShot::shot(
+    int num)
+{
+    QString outputPath{"/disk/F/project/Image/"};
+
+    AVCodecContext *dec_ctx = nullptr, *enc_ctx = nullptr; //解编码上下文
+    SwsContext *sws_ctx = nullptr;                         //色彩转换
+    AVFrame *dec_frame = nullptr, *enc_frame = nullptr;    //帧
+
+    int videoIndex = -1;
+    if (m_source.isEmpty()) {
+        std::cerr << "未设置打开文件位置\n";
+        return;
+    }
+    if (avformat_find_stream_info(m_fmt_ctx, nullptr) < 0) {
+        std::cerr << "无法获取流信息\n";
+        return;
+    }
+
+    videoIndex = av_find_best_stream(m_fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
+    if (videoIndex < 0) {
+        std::cerr << "未找到视频流\n";
+        return;
+    }
+
+    //获取流的环境（部分与解码器上下文有关）
+    AVCodecParameters *codec_par = m_fmt_ctx->streams[videoIndex]->codecpar;
+    const AVCodec *dec_codec = avcodec_find_decoder(codec_par->codec_id);
+    dec_ctx = avcodec_alloc_context3(dec_codec);
+    avcodec_parameters_to_context(dec_ctx, codec_par);
+
+    if (avcodec_open2(dec_ctx, dec_codec, nullptr) < 0) {
+        std::cerr << "无法打开解码器\n";
+        return;
+    }
+
+    // 编码器配置（MJPEG）
+    const AVCodec *enc_codec = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
+    enc_ctx = avcodec_alloc_context3(enc_codec);
+    enc_ctx->width = dec_ctx->width;
+    enc_ctx->height = dec_ctx->height;
+    enc_ctx->time_base = m_fmt_ctx->streams[videoIndex]->time_base; // 时间基
+    enc_ctx->pix_fmt = AV_PIX_FMT_YUV420P;                          // 改为标准YUV420P
+    enc_ctx->color_range = AVCOL_RANGE_JPEG;                        // 显式设置完全范围
+
+    if (avcodec_open2(enc_ctx, enc_codec, nullptr) < 0) {
+        std::cerr << "无法打开编码器\n";
+        return;
+    }
+
+    // 分配解码帧内存
+    dec_frame = av_frame_alloc();
+    if (!dec_frame) {
+        std::cerr << "无法分配解码帧内存\n";
+        return;
+    }
+
+    // 分配编码帧内存
+    enc_frame = av_frame_alloc();
+    if (!enc_frame) {
+        std::cerr << "无法分配编码帧内存\n";
+        return;
+    }
+    enc_frame->format = enc_ctx->pix_fmt;
+    enc_frame->width = enc_ctx->width;
+    enc_frame->height = enc_ctx->height;
+
+    if (av_frame_get_buffer(enc_frame, 32) < 0) {
+        std::cerr << "无法分配缓冲区\n";
+        return;
+    }
+
+    sws_ctx = sws_getContext(dec_ctx->width,
+                             dec_ctx->height,
+                             dec_ctx->pix_fmt,
+                             enc_ctx->width,
+                             enc_ctx->height,
+                             enc_ctx->pix_fmt,
+                             SWS_BILINEAR, //双线性插值算法（速度与质量的平衡）
+                             nullptr,
+                             nullptr,
+                             nullptr);
+
+    if (!sws_ctx) {
+        std::cerr << "无法创建颜色转换上下文\n";
+        return;
+    }
+
+    AVPacket pkt;
+    AVPacket *enc_pkt;
+    enc_pkt = av_packet_alloc();
+    enc_pkt->data = nullptr;
+    enc_pkt->size = 0;
+    int frameCount{0};
+
+    while (av_read_frame(m_fmt_ctx, &pkt) >= 0) {
+        if (pkt.stream_index == videoIndex) {
+            if (avcodec_send_packet(dec_ctx, &pkt) < 0) {
+                std::cerr << "发送数据包错误\n";
+                //continue;
+            }
+            while (avcodec_receive_frame(dec_ctx, dec_frame) >= 0) {
+                // 解码帧转编码帧 转格式
+                sws_scale(sws_ctx,
+                          dec_frame->data,
+                          dec_frame->linesize,
+                          0,
+                          dec_ctx->height,
+                          enc_frame->data,
+                          enc_frame->linesize);
+
+                if (avcodec_send_frame(enc_ctx, enc_frame) < 0) {
+                    std::cerr << "发送帧到编码器失败\n";
+                }
+
+                while (avcodec_receive_packet(enc_ctx, enc_pkt) >= 0) {
+                    QString filename = QString("%1frame%2.jpg").arg(outputPath).arg(frameCount, 5);
+                    frameCount++;
+
+                    FILE *fd = fopen(filename.toStdString().c_str(), "wb");
+                    if (!fd) {
+                        std::cerr << "创建失败:" << filename.toStdString() << "\n";
+                        continue;
+                    }
+                    fwrite(enc_pkt->data, 1, enc_pkt->size, fd);
+                    fclose(fd);
+                }
+            }
+        }
+    }
+    av_packet_unref(&pkt);
+
+    sws_freeContext(sws_ctx);
+    av_frame_free(&dec_frame);
+    av_frame_free(&enc_frame);
+    avcodec_free_context(&dec_ctx);
+    avcodec_free_context(&enc_ctx);
+}

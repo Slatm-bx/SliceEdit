@@ -4,34 +4,36 @@
 #include <QQmlEngine>
 #include <QtQml/qqmlregistration.h>
 #include <QUrl>
-#include <QtMultimedia/QMediaPlayer>
-#include <QtMultimedia/QVideoSink>
-#include <QImage>
+#include <string>
+
+extern "C" {
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libswscale/swscale.h" //格式转换库
+#include "libavutil/imgutils.h"
+}
 
 class VideoShot : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(
         QUrl source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(
-        int spacing READ spacing WRITE setSpacing NOTIFY spacingChanged)
     QML_ELEMENT
 public:
     explicit VideoShot(QObject *parent = nullptr);
+    ~VideoShot();
 
     QUrl source() const;
     void setSource(const QUrl source);
 
-    int spacing() const;
-    void setSpacing(const int spacing);
+    Q_INVOKABLE void shot(int num); //截图函数
 
 signals:
     void sourceChanged();
-    void spacingChanged();
 
 private:
-    QUrl m_source;
-    int m_spacing;
-    QMediaPlayer *m_player;
-    QVideoSink *m_sink;
+    QUrl m_source; //Qurl
+    int m_num;
+    int m_nowNum; //当前截图数量
+    AVFormatContext *m_fmt_ctx = nullptr;
 };

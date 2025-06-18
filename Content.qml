@@ -25,12 +25,6 @@ Item {
         anchors.right: parent.right
         anchors.top:parent.top
     }
-    Image{
-        width: 500
-        height: 500
-        id:silderImage
-        source: "file:///disk/F/pictures/IMG_20230725_225603_071.jpg"
-    }
 
     Dialogs{
         id:_dialogs
@@ -38,6 +32,7 @@ Item {
             onAccepted: {
                 player.source=fileOpen.selectedFile
                 videoshot.source=fileOpen.selectedFile
+                videoshot.shot(5)
             }
             onRejected: {
                 console.log("Error:read video file")
@@ -86,7 +81,6 @@ Item {
 
                 onMoved: {//仅在拖动时触发
                     player.position=value
-                    videoshot.spacing=value
                 }
                 enabled: content.player.source!=""
             }
