@@ -1,6 +1,8 @@
 #include "videoshot.h"
 #include <iostream>
 
+//图片大小640*360
+
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
@@ -27,6 +29,7 @@ QUrl VideoShot::source() const
 void VideoShot::setSource(
     const QUrl source)
 {
+    avformat_close_input(&m_fmt_ctx);
     m_source = source;
     emit sourceChanged();
     std::cout << source.toLocalFile().toStdString() << std::endl;
@@ -132,38 +135,62 @@ void VideoShot::shot(
     enc_pkt->data = nullptr;
     enc_pkt->size = 0;
     int frameCount{0};
+    double timeBase = av_q2d(m_fmt_ctx->streams[videoIndex]->time_base);
+    double totaltime = m_fmt_ctx->streams[videoIndex]->duration * timeBase;
+    std::cerr << "总时间:" << totaltime << "\n";
+    double spacingTime = totaltime / num;
+    double lastTime = 0.0; //记录下个截取的时间
 
     while (av_read_frame(m_fmt_ctx, &pkt) >= 0) {
         if (pkt.stream_index == videoIndex) {
             if (avcodec_send_packet(dec_ctx, &pkt) < 0) {
                 std::cerr << "发送数据包错误\n";
-                //continue;
+                continue;
             }
             while (avcodec_receive_frame(dec_ctx, dec_frame) >= 0) {
-                // 解码帧转编码帧 转格式
-                sws_scale(sws_ctx,
-                          dec_frame->data,
-                          dec_frame->linesize,
-                          0,
-                          dec_ctx->height,
-                          enc_frame->data,
-                          enc_frame->linesize);
+                //时间计算
+                bool save{false};
 
-                if (avcodec_send_frame(enc_ctx, enc_frame) < 0) {
-                    std::cerr << "发送帧到编码器失败\n";
+                if (dec_frame->pts != AV_NOPTS_VALUE) {
+                    double currentTime = timeBase * dec_frame->pts;
+                    if (lastTime == 0.0) {
+                        lastTime = spacingTime;
+                        save = true;
+                    }
+                    if (lastTime < currentTime) {
+                        save = true;
+                        lastTime += spacingTime;
+                    }
                 }
 
-                while (avcodec_receive_packet(enc_ctx, enc_pkt) >= 0) {
-                    QString filename = QString("%1frame%2.jpg").arg(outputPath).arg(frameCount, 5);
-                    frameCount++;
+                if (save)
+                // 解码帧转编码帧 转格式
+                {
+                    sws_scale(sws_ctx,
+                              dec_frame->data,
+                              dec_frame->linesize,
+                              0,
+                              dec_ctx->height,
+                              enc_frame->data,
+                              enc_frame->linesize);
 
-                    FILE *fd = fopen(filename.toStdString().c_str(), "wb");
-                    if (!fd) {
-                        std::cerr << "创建失败:" << filename.toStdString() << "\n";
-                        continue;
+                    if (avcodec_send_frame(enc_ctx, enc_frame) < 0) {
+                        std::cerr << "发送帧到编码器失败\n";
                     }
-                    fwrite(enc_pkt->data, 1, enc_pkt->size, fd);
-                    fclose(fd);
+
+                    while (avcodec_receive_packet(enc_ctx, enc_pkt) >= 0) {
+                        QString filename
+                            = QString("%1frame%2.jpg").arg(outputPath).arg(frameCount, 5);
+                        frameCount++;
+
+                        FILE *fd = fopen(filename.toStdString().c_str(), "wb");
+                        if (!fd) {
+                            std::cerr << "创建失败:" << filename.toStdString() << "\n";
+                            continue;
+                        }
+                        fwrite(enc_pkt->data, 1, enc_pkt->size, fd);
+                        fclose(fd);
+                    }
                 }
             }
         }

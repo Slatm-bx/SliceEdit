@@ -32,7 +32,7 @@ Item {
             onAccepted: {
                 player.source=fileOpen.selectedFile
                 videoshot.source=fileOpen.selectedFile
-                videoshot.shot(5)
+                videoshot.shot(10)
             }
             onRejected: {
                 console.log("Error:read video file")
