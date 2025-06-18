@@ -5,7 +5,6 @@ Item {
     property alias fileOpen: _fileOpen
     property alias about:_about
 
-
     FileDialog{
         id:_fileOpen
         title: "Select video file"
