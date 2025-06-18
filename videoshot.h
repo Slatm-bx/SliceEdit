@@ -4,36 +4,23 @@
 #include <QQmlEngine>
 #include <QtQml/qqmlregistration.h>
 #include <QUrl>
-#include <string>
-
-extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h" //格式转换库
-#include "libavutil/imgutils.h"
-}
+#include <thread>
 
 class VideoShot : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(
-        QUrl source READ source WRITE setSource NOTIFY sourceChanged)
     QML_ELEMENT
+
 public:
     explicit VideoShot(QObject *parent = nullptr);
     ~VideoShot();
 
-    QUrl source() const;
-    void setSource(const QUrl source);
-
-    Q_INVOKABLE void shot(int num); //截图函数
+    Q_INVOKABLE void shotThread(QUrl source, int num, QString outputPath);
 
 signals:
-    void sourceChanged();
+    void shotFinished();
 
 private:
-    QUrl m_source; //Qurl
-    int m_num;
-    int m_nowNum; //当前截图数量
-    AVFormatContext *m_fmt_ctx = nullptr;
+    void shot(QUrl source, int num = 3, QString outputPath = "/disk/F/project/Image/");
+    std::thread m_thread;
 };

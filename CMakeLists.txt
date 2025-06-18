@@ -21,21 +21,15 @@ qt_add_qml_module(
   1.0
   SOURCES
   main.cpp
+  videoshot.h
+  videoshot.cpp
   QML_FILES
   Main.qml
-  QML_FILES
   Content.qml
-  QML_FILES
   Actions.qml
-  QML_FILES
   Dialogs.qml
-  QML_FILES
   Player.qml
-  SOURCES
-  SOURCES
-  SOURCES
-  videoshot.h
-  videoshot.cpp)
+  PlayerSlider.qml)
 
 target_compile_features(appVideoedit PRIVATE cxx_std_23)
 

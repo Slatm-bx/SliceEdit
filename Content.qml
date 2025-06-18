@@ -2,7 +2,6 @@ import QtQuick
 import QtMultimedia
 import QtQuick.Layouts
 import QtQuick.Controls
-import Videoedit
 
 Item {
     id:content
@@ -31,8 +30,8 @@ Item {
         fileOpen{
             onAccepted: {
                 player.source=fileOpen.selectedFile
-                videoshot.source=fileOpen.selectedFile
-                videoshot.shot(10)
+                playerSlider.source=fileOpen.selectedFile
+
             }
             onRejected: {
                 console.log("Error:read video file")
@@ -43,7 +42,7 @@ Item {
 
     Rectangle{
         id:rec
-        height: 40
+        height: 100
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -71,7 +70,8 @@ Item {
                     return time
                 }
             }
-            Slider{
+            PlayerSlider{
+                id: playerSlider
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: progress.right
                 anchors.right: parent.right
@@ -86,11 +86,5 @@ Item {
             }
         }
     }
-
-    VideoShot{
-        id:videoshot
-
-    }
-
 
 }

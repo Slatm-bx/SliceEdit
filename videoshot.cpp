@@ -1,7 +1,7 @@
 #include "videoshot.h"
 #include <iostream>
-
-//图片大小640*360
+#include <thread>
+#include <functional>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -18,56 +18,54 @@ VideoShot::VideoShot(
 
 VideoShot::~VideoShot()
 {
-    avformat_close_input(&m_fmt_ctx);
-}
-
-QUrl VideoShot::source() const
-{
-    return m_source;
-}
-
-void VideoShot::setSource(
-    const QUrl source)
-{
-    avformat_close_input(&m_fmt_ctx);
-    m_source = source;
-    emit sourceChanged();
-    std::cout << source.toLocalFile().toStdString() << std::endl;
-    //TODO 验证是否需要打开前释放
-
-    if (avformat_open_input(&m_fmt_ctx, source.toLocalFile().toStdString().c_str(), nullptr, nullptr)
-        < 0) {
-        std::cerr << "无法打开输入文件\n";
-    }
+    m_thread.join();
 }
 
 void VideoShot::shot(
-    int num)
+    QUrl source, int num, QString outputPath)
 {
-    QString outputPath{"/disk/F/project/Image/"};
-
+    AVFormatContext *fmt_ctx;
     AVCodecContext *dec_ctx = nullptr, *enc_ctx = nullptr; //解编码上下文
     SwsContext *sws_ctx = nullptr;                         //色彩转换
     AVFrame *dec_frame = nullptr, *enc_frame = nullptr;    //帧
 
     int videoIndex = -1;
-    if (m_source.isEmpty()) {
-        std::cerr << "未设置打开文件位置\n";
+
+    //输入检测
+    if (source.isEmpty()) {
+        std::cerr << "输入文件为空\n";
         return;
     }
-    if (avformat_find_stream_info(m_fmt_ctx, nullptr) < 0) {
+    if (outputPath.isEmpty()) {
+        std::cerr << "输出位置为空\n";
+        return;
+    }
+    if (num <= 0) {
+        std::cerr << "指定数量不能小于等于0\n";
+        return;
+    }
+
+    std::cerr << "开始截图\n输入路径:" << source.toLocalFile().toStdString() << "\n数量:" << num
+              << "\n输出路径:" << outputPath.toStdString() << "\n";
+    if (avformat_open_input(&fmt_ctx, source.toLocalFile().toStdString().c_str(), nullptr, nullptr)
+        < 0) {
+        std::cerr << "无法打开输入文件\n";
+        return;
+    }
+
+    if (avformat_find_stream_info(fmt_ctx, nullptr) < 0) {
         std::cerr << "无法获取流信息\n";
         return;
     }
 
-    videoIndex = av_find_best_stream(m_fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
+    videoIndex = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
     if (videoIndex < 0) {
         std::cerr << "未找到视频流\n";
         return;
     }
 
     //获取流的环境（部分与解码器上下文有关）
-    AVCodecParameters *codec_par = m_fmt_ctx->streams[videoIndex]->codecpar;
+    AVCodecParameters *codec_par = fmt_ctx->streams[videoIndex]->codecpar;
     const AVCodec *dec_codec = avcodec_find_decoder(codec_par->codec_id);
     dec_ctx = avcodec_alloc_context3(dec_codec);
     avcodec_parameters_to_context(dec_ctx, codec_par);
@@ -82,7 +80,7 @@ void VideoShot::shot(
     enc_ctx = avcodec_alloc_context3(enc_codec);
     enc_ctx->width = dec_ctx->width;
     enc_ctx->height = dec_ctx->height;
-    enc_ctx->time_base = m_fmt_ctx->streams[videoIndex]->time_base; // 时间基
+    enc_ctx->time_base = fmt_ctx->streams[videoIndex]->time_base;   // 时间基
     enc_ctx->pix_fmt = AV_PIX_FMT_YUV420P;                          // 改为标准YUV420P
     enc_ctx->color_range = AVCOL_RANGE_JPEG;                        // 显式设置完全范围
 
@@ -135,13 +133,13 @@ void VideoShot::shot(
     enc_pkt->data = nullptr;
     enc_pkt->size = 0;
     int frameCount{0};
-    double timeBase = av_q2d(m_fmt_ctx->streams[videoIndex]->time_base);
-    double totaltime = m_fmt_ctx->streams[videoIndex]->duration * timeBase;
+    double timeBase = av_q2d(fmt_ctx->streams[videoIndex]->time_base);
+    double totaltime = fmt_ctx->streams[videoIndex]->duration * timeBase;
     std::cerr << "总时间:" << totaltime << "\n";
     double spacingTime = totaltime / num;
     double lastTime = 0.0; //记录下个截取的时间
 
-    while (av_read_frame(m_fmt_ctx, &pkt) >= 0) {
+    while (av_read_frame(fmt_ctx, &pkt) >= 0) {
         if (pkt.stream_index == videoIndex) {
             if (avcodec_send_packet(dec_ctx, &pkt) < 0) {
                 std::cerr << "发送数据包错误\n";
@@ -179,8 +177,7 @@ void VideoShot::shot(
                     }
 
                     while (avcodec_receive_packet(enc_ctx, enc_pkt) >= 0) {
-                        QString filename
-                            = QString("%1frame%2.jpg").arg(outputPath).arg(frameCount, 5);
+                        QString filename = QString("%1frame%2.jpg").arg(outputPath).arg(frameCount);
                         frameCount++;
 
                         FILE *fd = fopen(filename.toStdString().c_str(), "wb");
@@ -196,10 +193,24 @@ void VideoShot::shot(
         }
     }
     av_packet_unref(&pkt);
+    av_packet_free(&enc_pkt);
 
+    avformat_close_input(&fmt_ctx);
     sws_freeContext(sws_ctx);
     av_frame_free(&dec_frame);
     av_frame_free(&enc_frame);
     avcodec_free_context(&dec_ctx);
     avcodec_free_context(&enc_ctx);
+    emit shotFinished();
+}
+
+void VideoShot::shotThread(
+    QUrl source, int num, QString outputPath)
+{
+    if (m_thread.joinable()) {
+        std::cerr << "你不应该看见一大堆我\n";
+        m_thread.join();
+    }
+
+    m_thread = std::thread(&VideoShot::shot, this, source, num, outputPath);
 }
