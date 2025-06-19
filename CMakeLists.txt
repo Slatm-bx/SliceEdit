@@ -7,7 +7,7 @@ project(
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia)
 
 qt_standard_project_setup(REQUIRES 6.9)
 
@@ -21,6 +21,8 @@ qt_add_qml_module(
   1.0
   SOURCES
   main.cpp
+  videoshot.h
+  videoshot.cpp
   QML_FILES
   Main.qml
   QML_FILES Content.qml
@@ -28,15 +30,18 @@ qt_add_qml_module(
   QML_FILES Dialogs.qml
   QML_FILES Player.qml
   QML_FILES PreviewBarRow.qml
+  QML_FILES PlayerSlider.qml
   QML_FILES PreviewBarControlRow.qml
   QML_FILES VideoList.qml
   QML_FILES VideoParams.qml
   QML_FILES VideoPlayer.qml
   QML_FILES Menus.qml)
 
+
 target_compile_features(appVideoedit PRIVATE cxx_std_23)
 
-target_link_libraries(appVideoedit PRIVATE Qt6::Quick)
+target_link_libraries(appVideoedit PRIVATE Qt6::Quick Qt6::Multimedia avutil
+                                           avformat avcodec swscale)
 
 set_target_properties(
   appVideoedit

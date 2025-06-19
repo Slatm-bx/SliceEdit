@@ -14,6 +14,7 @@ int main(
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
+
     engine.loadFromModule("Videoedit", "Main");
 
     return app.exec();

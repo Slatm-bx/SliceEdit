@@ -25,10 +25,6 @@ ColumnLayout{
     Dialogs{
         id:_dialogs
         fileOpen{
-            onAccepted: {
-                _player.source=fileOpen.selectedFile
-                _player.play()
-            }
             onRejected: {
                 console.log("Error:read video file")
                 return;
@@ -50,7 +46,6 @@ ColumnLayout{
 
     Rectangle {
         id:_playrc
-        // radius: 10
         width:parent.width
         height:parent.height - _vrow.implicitHeight - _vtext.height
         Layout.topMargin: 0
@@ -125,8 +120,6 @@ ColumnLayout{
                         Layout.minimumHeight: 30
 
                         background: Rectangle {
-                            // implicitWidth: parent.width
-                            // implicitHeight: parent.height
                             radius: width / 2
                             color: "#333"
                         }
@@ -148,8 +141,6 @@ ColumnLayout{
                         Layout.minimumHeight: 30
 
                         background: Rectangle {
-                            // implicitWidth: parent.width
-                            // implicitHeight: parent.height
                             radius: width / 2
                             color: "#333"  // 黄色背景
                         }
@@ -178,12 +169,9 @@ ColumnLayout{
                                     if (root.visibility === Window.FullScreen)
                                        root.visibility = Window.Windowed
                                     else
-                                        // visibility = Window.FullScreen
                                         showFullScreen()
                                 }
                         background: Rectangle {
-                            // implicitWidth: parent.width
-                            // implicitHeight: parent.height
                             radius: width / 2
                             color: "#333"  // 蓝色背景
                         }

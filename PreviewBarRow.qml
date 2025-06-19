@@ -4,9 +4,13 @@ import QtQuick 2.15
 import QtQuick.Layouts
 
 Rectangle {
-     // radius: 10
+    property alias playerslider: _playerslider
+
     id: timeline
     Layout.fillHeight:true
     Layout.fillWidth: true
     color: "#333"
+    PlayerSlider{
+        id:_playerslider
+    }
 }
