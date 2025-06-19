@@ -2,6 +2,8 @@
 #include <iostream>
 #include <thread>
 #include <functional>
+#include <mutex>
+#include <QDir>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -18,16 +20,23 @@ VideoShot::VideoShot(
 
 VideoShot::~VideoShot()
 {
-    //m_thread.join();
     for (std::thread &a : m_threads) {
         if (a.joinable())
             a.join();
+    }
+    QDir dir(m_outputPath);
+    if (dir.exists(m_outputPath)) {
+        if (dir.removeRecursively())
+            std::cerr << "缓存清除！\n";
+        else
+            std::cerr << "缓存清除失败\n";
     }
 }
 
 void VideoShot::shot(
     QUrl source, int num, QString outputPath)
 {
+    m_lock.lock();
     AVFormatContext *fmt_ctx;
     AVCodecContext *dec_ctx = nullptr, *enc_ctx = nullptr; //解编码上下文
     SwsContext *sws_ctx = nullptr;                         //色彩转换
@@ -48,6 +57,11 @@ void VideoShot::shot(
         std::cerr << "指定数量不能小于等于0\n";
         return;
     }
+
+    QDir dir;
+    if (!dir.exists(outputPath))
+        dir.mkdir(outputPath);
+
     std::cerr << "开始截图\n输入路径:" << source.toLocalFile().toStdString() << "\n数量:" << num
               << "\n输出路径:" << outputPath.toStdString() << "\n";
 
@@ -79,7 +93,6 @@ void VideoShot::shot(
         return;
     }
 
-    std::cerr << "编码器配置\n";
     // 编码器配置（MJPEG）
     const AVCodec *enc_codec = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
     enc_ctx = avcodec_alloc_context3(enc_codec);
@@ -101,7 +114,6 @@ void VideoShot::shot(
         return;
     }
 
-    std::cerr << "分配编码帧内存\n";
     // 分配编码帧内存
     enc_frame = av_frame_alloc();
     if (!enc_frame) {
@@ -145,7 +157,6 @@ void VideoShot::shot(
     double spacingTime = totaltime / num;
     double lastTime = 0.0; //记录下个截取的时间
 
-    std::cerr << "循环\n";
     while (av_read_frame(fmt_ctx, &pkt) >= 0) {
         if (pkt.stream_index == videoIndex) {
             if (avcodec_send_packet(dec_ctx, &pkt) < 0) {
@@ -209,12 +220,14 @@ void VideoShot::shot(
     avcodec_free_context(&enc_ctx);
     avformat_close_input(&fmt_ctx);
     emit shotFinished();
+    m_lock.unlock();
     std::cerr << "截图结束\n";
 }
 
 void VideoShot::shotThread(
     QUrl source, int num, QString outputPath)
 {
+    m_outputPath = outputPath;
     if (source.isEmpty()) {
         std::cerr << "输入文件为空\n";
         return;
@@ -227,6 +240,10 @@ void VideoShot::shotThread(
         std::cerr << "指定数量不能小于等于0\n";
         return;
     }
-
     m_threads.emplace_back(std::thread(&VideoShot::shot, this, source, num, outputPath));
+}
+
+QString VideoShot::tmpPath()
+{
+    return QDir::tempPath();
 }

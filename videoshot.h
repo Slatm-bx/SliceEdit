@@ -6,6 +6,7 @@
 #include <QUrl>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 class VideoShot : public QObject
 {
@@ -17,6 +18,7 @@ public:
     ~VideoShot();
 
     Q_INVOKABLE void shotThread(QUrl source, int num, QString outputPath);
+    Q_INVOKABLE QString tmpPath();
 
 signals:
     void shotFinished();
@@ -24,4 +26,6 @@ signals:
 private:
     void shot(QUrl source, int num, QString outputPath);
     std::vector<std::thread> m_threads; //线程池
+    std::mutex m_lock;
+    QString m_outputPath;
 };

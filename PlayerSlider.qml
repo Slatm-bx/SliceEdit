@@ -6,7 +6,7 @@ import Videoedit
 Slider {
     property url source
     property int imageNum
-    property string outputPath: "/disk/F/project/Image/"
+    property string outputPath
 
     id: playerSlider
     height:150
@@ -93,12 +93,16 @@ Slider {
 
     VideoShot{
         id:_videoshot
+        property string tmppath
+        Component.onCompleted: {
+            outputPath=tmpPath()+"/VideoShot/";
+
+        }
+
 
         onShotFinished: {
             for(let i=0;i<imageNum;i++){
-                console.log("读取",i);
                 dataModel.append({"pictureUrl":"file://"+outputPath+"frame"+i+".jpg"});
-
             }
         }
     }
