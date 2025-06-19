@@ -22,8 +22,6 @@ ColumnLayout{
     }
 //这个Rectangle是真正意义上的VideoList,生成的VideoList都应该在这个Rectangle上显示
     Rectangle{
-        // width:(root.width)/5
-         // radius: 10
         id: _listrec
         Layout.fillWidth: true
         Layout.fillHeight: true

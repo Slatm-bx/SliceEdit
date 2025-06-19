@@ -8,6 +8,7 @@ import QtMultimedia
 ColumnLayout{
     property alias player :_player
     property alias dialogs : _dialogs
+    property alias videoOutput:_videoOutput
     spacing:0
     Layout.fillWidth: true
     Layout.fillHeight: true
