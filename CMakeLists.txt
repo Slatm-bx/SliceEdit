@@ -29,7 +29,9 @@ qt_add_qml_module(
   Actions.qml
   Dialogs.qml
   Player.qml
-  PlayerSlider.qml)
+  PlayerSlider.qml
+  SOURCES
+  QML_FILES   )
 
 target_compile_features(appVideoedit PRIVATE cxx_std_23)
 

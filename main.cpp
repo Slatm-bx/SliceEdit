@@ -14,6 +14,8 @@ int main(
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
+    //engine.addImageProvider();
+
     engine.loadFromModule("Videoedit", "Main");
 
     return app.exec();

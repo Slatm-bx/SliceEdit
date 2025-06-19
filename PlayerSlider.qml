@@ -9,6 +9,10 @@ Slider {
     property string outputPath
 
     id: playerSlider
+    width: {
+        Math.floor(parent.width/200)*200
+    }
+
     height:150
     value: 0.5
     background: Rectangle {
@@ -33,21 +37,6 @@ Slider {
 
     }
 
-    onWidthChanged: {
-        imageNum=Math.floor(width/150)
-        resizeTimer.restart()
-        dataModel.clear()
-    }
-
-    Timer {//防止大量截图请求
-            id: resizeTimer
-            interval: 1000
-            repeat: false
-            onTriggered: {
-                console.log("Width stabilized at:"+parent.width)
-                if(source!="")_videoshot.shotThread(source,imageNum,outputPath)
-            }
-        }
 
     Rectangle {
         id:progress
@@ -86,11 +75,29 @@ Slider {
             width:200
             height:150
             id:thumbnail
+            cache: false
             fillMode : Image.PreserveAspectFit
             source:model.pictureUrl
         }
     }
 
+    onWidthChanged: {
+        dataModel.clear()
+        imageNum=Math.floor(width/200)
+        resizeTimer.restart()
+    }
+
+    Timer {//防止大量截图请求
+        id: resizeTimer
+        interval: 1000
+        repeat: false
+        onTriggered: {
+            console.log("Width stabilized at:"+parent.width)
+            if(source!="")_videoshot.shotThread(source,imageNum,outputPath)
+        }
+    }
+
+    property alias videoshot: _videoshot
     VideoShot{
         id:_videoshot
         property string tmppath
@@ -101,8 +108,10 @@ Slider {
 
 
         onShotFinished: {
+            dataModel.clear()
             for(let i=0;i<imageNum;i++){
                 dataModel.append({"pictureUrl":"file://"+outputPath+"frame"+i+".jpg"});
+                console.log("读取:","file://"+outputPath+"frame"+i+".jpg")
             }
         }
     }
@@ -112,4 +121,5 @@ Slider {
             _videoshot.shotThread(source,imageNum,outputPath)
         }
     }
+
 }

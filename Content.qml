@@ -14,6 +14,7 @@ Item {
     Player{
         id:_player
         videoOutput: videoOutput
+
     }
 
 
@@ -29,9 +30,9 @@ Item {
         id:_dialogs
         fileOpen{
             onAccepted: {
+                player.stop()
                 //player.source=fileOpen.selectedFile
                 playerSlider.source=fileOpen.selectedFile
-
             }
             onRejected: {
                 console.log("Error:read video file")
@@ -40,9 +41,10 @@ Item {
         }
     }
 
+
     Rectangle{
         id:rec
-        height: 100
+        height: 150
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -70,20 +72,30 @@ Item {
                     return time
                 }
             }
-            PlayerSlider{
-                id: playerSlider
+            Rectangle{
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: progress.right
                 anchors.right: parent.right
+                PlayerSlider{
+                    id: playerSlider
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
 
-                to:player.duration
-                value: player.position
+                    to:player.duration
+                    value: player.position
 
-                onMoved: {//仅在拖动时触发
-                    player.position=value
+                    onMoved: {//仅在拖动时触发
+                        player.position=value
+                    }
+                    enabled: content.player.source!=""
+                    videoshot{
+                        onShotFinished: {//截图后再加载视频 反过来不好处理
+                            player.source=source
+                        }
+                    }
                 }
-                enabled: content.player.source!=""
             }
+
         }
     }
 
