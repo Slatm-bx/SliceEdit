@@ -37,10 +37,10 @@ void VideoShot::shot(
     QUrl source, int num, QString outputPath)
 {
     m_lock.lock();
-    AVFormatContext *fmt_ctx;
-    AVCodecContext *dec_ctx = nullptr, *enc_ctx = nullptr; //解编码上下文
-    SwsContext *sws_ctx = nullptr;                         //色彩转换
-    AVFrame *dec_frame = nullptr, *enc_frame = nullptr;    //帧
+    AVFormatContext *fmt_ctx{nullptr};                   //必须为空，不然第29秒后就炸
+    AVCodecContext *dec_ctx{nullptr}, *enc_ctx{nullptr}; //解编码上下文
+    SwsContext *sws_ctx{nullptr};                        //色彩转换
+    AVFrame *dec_frame{nullptr}, *enc_frame{nullptr};    //帧
 
     int videoIndex = -1;
 
@@ -65,9 +65,14 @@ void VideoShot::shot(
     std::cerr << "开始截图\n输入路径:" << source.toLocalFile().toStdString() << "\n数量:" << num
               << "\n输出路径:" << outputPath.toStdString() << "\n";
 
-    if (avformat_open_input(&fmt_ctx, source.toLocalFile().toStdString().c_str(), nullptr, nullptr)
-        < 0) {
-        std::cerr << "无法打开输入文件\n";
+    int ret = avformat_open_input(&fmt_ctx,
+                                  source.toLocalFile().toStdString().c_str(),
+                                  nullptr,
+                                  nullptr);
+    if (ret < 0) {
+        char errBuf[AV_ERROR_MAX_STRING_SIZE];
+        av_strerror(ret, errBuf, sizeof(errBuf));
+        qDebug() << "错误:" << errBuf;
         return;
     }
 
@@ -83,8 +88,10 @@ void VideoShot::shot(
     }
 
     //获取流的环境（部分与解码器上下文有关）
-    AVCodecParameters *codec_par = fmt_ctx->streams[videoIndex]->codecpar;
-    const AVCodec *dec_codec = avcodec_find_decoder(codec_par->codec_id);
+    AVCodecParameters *codec_par{nullptr};
+    codec_par = fmt_ctx->streams[videoIndex]->codecpar;
+    const AVCodec *dec_codec{nullptr};
+    dec_codec = avcodec_find_decoder(codec_par->codec_id);
     dec_ctx = avcodec_alloc_context3(dec_codec);
     avcodec_parameters_to_context(dec_ctx, codec_par);
 
@@ -94,7 +101,8 @@ void VideoShot::shot(
     }
 
     // 编码器配置（MJPEG）
-    const AVCodec *enc_codec = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
+    const AVCodec *enc_codec{nullptr};
+    enc_codec = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
     enc_ctx = avcodec_alloc_context3(enc_codec);
     enc_ctx->width = dec_ctx->width;
     enc_ctx->height = dec_ctx->height;
@@ -146,7 +154,7 @@ void VideoShot::shot(
     }
 
     AVPacket pkt;
-    AVPacket *enc_pkt;
+    AVPacket *enc_pkt = nullptr;
     enc_pkt = av_packet_alloc();
     enc_pkt->data = nullptr;
     enc_pkt->size = 0;
