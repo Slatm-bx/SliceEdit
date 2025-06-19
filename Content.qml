@@ -29,7 +29,7 @@ Item {
         id:_dialogs
         fileOpen{
             onAccepted: {
-                player.source=fileOpen.selectedFile
+                //player.source=fileOpen.selectedFile
                 playerSlider.source=fileOpen.selectedFile
 
             }

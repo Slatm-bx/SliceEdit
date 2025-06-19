@@ -5,6 +5,7 @@
 #include <QtQml/qqmlregistration.h>
 #include <QUrl>
 #include <thread>
+#include <vector>
 
 class VideoShot : public QObject
 {
@@ -21,6 +22,6 @@ signals:
     void shotFinished();
 
 private:
-    void shot(QUrl source, int num = 3, QString outputPath = "/disk/F/project/Image/");
-    std::thread m_thread;
+    void shot(QUrl source, int num, QString outputPath);
+    std::vector<std::thread> m_threads; //线程池
 };

@@ -18,7 +18,11 @@ VideoShot::VideoShot(
 
 VideoShot::~VideoShot()
 {
-    m_thread.join();
+    //m_thread.join();
+    for (std::thread &a : m_threads) {
+        if (a.joinable())
+            a.join();
+    }
 }
 
 void VideoShot::shot(
@@ -44,9 +48,9 @@ void VideoShot::shot(
         std::cerr << "指定数量不能小于等于0\n";
         return;
     }
-
     std::cerr << "开始截图\n输入路径:" << source.toLocalFile().toStdString() << "\n数量:" << num
               << "\n输出路径:" << outputPath.toStdString() << "\n";
+
     if (avformat_open_input(&fmt_ctx, source.toLocalFile().toStdString().c_str(), nullptr, nullptr)
         < 0) {
         std::cerr << "无法打开输入文件\n";
@@ -75,14 +79,15 @@ void VideoShot::shot(
         return;
     }
 
+    std::cerr << "编码器配置\n";
     // 编码器配置（MJPEG）
     const AVCodec *enc_codec = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
     enc_ctx = avcodec_alloc_context3(enc_codec);
     enc_ctx->width = dec_ctx->width;
     enc_ctx->height = dec_ctx->height;
-    enc_ctx->time_base = fmt_ctx->streams[videoIndex]->time_base;   // 时间基
-    enc_ctx->pix_fmt = AV_PIX_FMT_YUV420P;                          // 改为标准YUV420P
-    enc_ctx->color_range = AVCOL_RANGE_JPEG;                        // 显式设置完全范围
+    enc_ctx->time_base = fmt_ctx->streams[videoIndex]->time_base; // 时间基
+    enc_ctx->pix_fmt = AV_PIX_FMT_YUV420P;                        // 改为标准YUV420P
+    enc_ctx->color_range = AVCOL_RANGE_JPEG;                      // 显式设置完全范围
 
     if (avcodec_open2(enc_ctx, enc_codec, nullptr) < 0) {
         std::cerr << "无法打开编码器\n";
@@ -96,6 +101,7 @@ void VideoShot::shot(
         return;
     }
 
+    std::cerr << "分配编码帧内存\n";
     // 分配编码帧内存
     enc_frame = av_frame_alloc();
     if (!enc_frame) {
@@ -139,6 +145,7 @@ void VideoShot::shot(
     double spacingTime = totaltime / num;
     double lastTime = 0.0; //记录下个截取的时间
 
+    std::cerr << "循环\n";
     while (av_read_frame(fmt_ctx, &pkt) >= 0) {
         if (pkt.stream_index == videoIndex) {
             if (avcodec_send_packet(dec_ctx, &pkt) < 0) {
@@ -195,22 +202,31 @@ void VideoShot::shot(
     av_packet_unref(&pkt);
     av_packet_free(&enc_pkt);
 
-    avformat_close_input(&fmt_ctx);
     sws_freeContext(sws_ctx);
     av_frame_free(&dec_frame);
     av_frame_free(&enc_frame);
     avcodec_free_context(&dec_ctx);
     avcodec_free_context(&enc_ctx);
+    avformat_close_input(&fmt_ctx);
     emit shotFinished();
+    std::cerr << "截图结束\n";
 }
 
 void VideoShot::shotThread(
     QUrl source, int num, QString outputPath)
 {
-    if (m_thread.joinable()) {
-        std::cerr << "你不应该看见一大堆我\n";
-        m_thread.join();
+    if (source.isEmpty()) {
+        std::cerr << "输入文件为空\n";
+        return;
+    }
+    if (outputPath.isEmpty()) {
+        std::cerr << "输出位置为空\n";
+        return;
+    }
+    if (num <= 0) {
+        std::cerr << "指定数量不能小于等于0\n";
+        return;
     }
 
-    m_thread = std::thread(&VideoShot::shot, this, source, num, outputPath);
+    m_threads.emplace_back(std::thread(&VideoShot::shot, this, source, num, outputPath));
 }

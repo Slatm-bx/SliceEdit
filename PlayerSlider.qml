@@ -21,21 +21,30 @@ Slider {
         radius: 2
         color: "white"
         opacity : 1
+        Text {
+            anchors.centerIn: parent
+            id: emptyText
+            color: "black"
+            text: {
+                if(source=="")return "无视频"
+                else return "正在加载";
+            }
+        }
 
     }
 
     onWidthChanged: {
         imageNum=Math.floor(width/150)
         resizeTimer.restart()
+        dataModel.clear()
     }
 
-    Timer {
+    Timer {//防止大量截图请求
             id: resizeTimer
             interval: 1000
             repeat: false
             onTriggered: {
                 console.log("Width stabilized at:"+parent.width)
-                dataModel.clear()
                 if(source!="")_videoshot.shotThread(source,imageNum,outputPath)
             }
         }
@@ -92,12 +101,11 @@ Slider {
 
             }
         }
-
-
-
     }
 
     onSourceChanged: {
-        if(imageNum>0)_videoshot.shotThread(source,imageNum,outputPath)
+        if(imageNum>0){
+            _videoshot.shotThread(source,imageNum,outputPath)
+        }
     }
 }
