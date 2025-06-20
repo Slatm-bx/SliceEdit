@@ -5,7 +5,7 @@ Item {
     property alias fileOpen: _fileOpen
     property alias about:_about
     property alias saveDialog:_saveDialog
-
+    property alias cutErrorDialog:_cutError
     FileDialog{
         id:_fileOpen
         title: "Select video file"
@@ -27,6 +27,14 @@ Item {
         currentFolder: "./"
         fileMode:FileDialog.SaveFile
         nameFilters: ["Vidoe File(*.mp4 *avi *mkv)"]
+    }
+
+    MessageDialog{
+        id:_cutError
+        title: "CutError"
+        buttons: MessageDialog.Ok
+        text:"Video Player"
+        informativeText: "The selected time is incorrect."
     }
 }
 

@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 
 Rectangle {
-    property alias playerslider: _playerslider
+    property alias playerSlider: _playerslider
 
     id: timeline
     Layout.fillHeight:true

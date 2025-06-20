@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import "cutViewControl.js" as CutViewControl
 
 RowLayout {
+    property alias stratCutButton:_stratCutButton
     spacing: 5
     id:_lrow
     Button {

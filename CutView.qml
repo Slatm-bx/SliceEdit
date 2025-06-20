@@ -26,6 +26,8 @@ Rectangle{
             width:parent.width
             height:100
             color: ListView.isCurrentItem?"#e0ffff":"white"
+            property int cutId:model.cutId
+
             RowLayout{
                 anchors.fill:parent
                 // spacing:0

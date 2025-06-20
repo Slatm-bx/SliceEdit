@@ -7,7 +7,7 @@ import "cutViewControl.js" as CutViewControl
 Item {
     property alias videoPlayer: _VP
     property alias videoList: _VL
-
+    property alias timeline: _timeline
     // 主布局
     id:content
     ColumnLayout {
@@ -41,7 +41,7 @@ Item {
                     fileOpen{
                         onAccepted: {
                             _VP.player.stop()
-                            timeline.playerslider.source=dialogs.fileOpen.selectedFile
+                            _timeline.playerSlider.source=dialogs.fileOpen.selectedFile
                         }
                     }
                     saveDialog{
@@ -75,20 +75,20 @@ Item {
         }
 
         PreviewBarRow{
-            id: timeline
+            id: _timeline
             height: (1*root.height)/3 - _lrow.implicitHeight
             width:root.width
-            playerslider{
+            playerSlider{
                 videoshot{
                     onShotFinished: {//截图后再加载视频 反过来不好处理
-                        _VP.player.source=playerslider.source
+                        _VP.player.source=playerSlider.source
                         _VP.player.play()
                     }
                 }
                 to:_VP.player.duration
                 value: _VP.player.position
                 onMoved: {
-                    _VP.player.position=playerslider.value
+                    _VP.player.position=playerSlider.value
                 }
                 enabled: _VP.player.source!=""
             }

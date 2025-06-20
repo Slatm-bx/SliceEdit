@@ -20,17 +20,16 @@ function removeFileExtension(filePath) {
 
 function loadStartTime(){
     console.log("开始时间"+videoPlayer.player.position);
+    console.log("path:",timeline.playerSlider.outputPath);
+    //let _stratCutButton=
     //缩略图路径
     videoPlayer.videoOutput.grabToImage(function(result) {
-        console.log("_cutButton.count",_stratCutButton.count);
-        let path="file:///run/media/root/85f25097-659c-4c70-b51f-71bf7b4c3036/qt6_course/shixun/submit/dev/thumbnails/"
-            +_stratCutButton.count+".jpg";//!!!
-        _stratCutButton.count++;
+        let path=timeline.playerSlider.outputPath+_stratCutButton.count+".jpg";//
+
         result.saveToFile(path);
-        console.log("_cutButton.count",_stratCutButton.count);
-        console.log("Filepath",path);
         videoList.cutView.thumbnailData.append({"videoUrl":videoPlayer.player.source,
-                                                "thumUrl":path,"startTime":videoPlayer.player.position,"endTime":-1});
+                                                "thumUrl":"file://"+path,"startTime":videoPlayer.player.position,"endTime":-1,"cutId":_stratCutButton.count});
+        _stratCutButton.count++;
         _stratCutButton.enabled=false;
         _endCutButton.enabled=true;
         //需要禁用拖放功能
@@ -40,6 +39,11 @@ function loadEndTime(){
     //更新当前视图项
     let model=videoList.cutView.thumbnailData
     model.set(model.count-1,{"endTime":videoPlayer.player.position});//当没有设置endtime时，会对拖放操作造成影响
+    if(model.get(model.count-1).startTime>model.get(model.count-1).endTime) {
+        let cutErrorDialog=videoPlayer.dialogs.cutErrorDialog;
+        cutErrorDialog.open();
+        return;
+    }
     //model.get(model.count-1).endTime=videoPlayer.player.position;
     //将stratCut设置为true
     _stratCutButton.enabled=true;
