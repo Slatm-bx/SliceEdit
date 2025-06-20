@@ -70,14 +70,17 @@ Rectangle{
                     Text{
                         id:etime
                         text:CutViewControl.formatTime(model.endTime)
-                        visible: model.endTime==-1 ? false:true
+                        visible: model.endTime===-1 ? false:true
                     }
                 }
             }
             TapHandler{
-                onTapped:{
-                root.cutList.currentIndex=index;//index前不能加chapter,index处于构建环境中既不属于listveiw也不属于视图项
-                }
+              onTapped: (event,button)=>{
+                  root.cutList.currentIndex = index;
+                 if(button===Qt.RightButton) {
+                             contextMenu.open();
+                        }
+                    }
             }
 
         }
@@ -118,7 +121,7 @@ Rectangle{
                 ToolButton {
                     id:deleteButton
                     Layout.alignment: Qt.AlignRight
-                    text: qsTr("delete")
+                    text: qsTr("操作切片")
                     onClicked: {
                         //显示上下文菜单
                         contextMenu.open();
@@ -143,6 +146,16 @@ Rectangle{
 
                                 root.thumbnailData.clear();
                             }
+                        }
+                        MenuItem {
+                            text: "向上移"
+                            visible: cutList.currentIndex === 0 ? false :true
+                            onTriggered:CutViewControl.moveClipUp()
+                        }
+                        MenuItem {
+                            visible:cutList.currentIndex === cutList.count -1 ?false :true
+                            text: "向下移"
+                            onTriggered:CutViewControl.moveClipDown()
                         }
                     }
                 }

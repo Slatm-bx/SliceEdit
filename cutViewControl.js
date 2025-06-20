@@ -58,3 +58,25 @@ function formatTime(ms) {
        return (minutes < 10 ? "0" + minutes : minutes) + ":" +
               (seconds < 10 ? "0" + seconds : seconds);
 }
+
+function moveClipUp(){
+    let videoModel = content.videoList.cutView.thumbnailData;
+    let cI = content.videoList.cutView.cutList.currentIndex;
+    if (cI >= 0) {
+            // 交换当前元素和前一个元素
+            videoModel.move(cI, cI - 1, 1);
+            // 更新 currentIndex 以保持选中状态
+            content.videoList.cutView.cutList.currentIndex = cI - 1;
+        }
+}
+
+function moveClipDown(){
+    let videoModel = content.videoList.cutView.thumbnailData;
+    let cI = content.videoList.cutView.cutList.currentIndex;
+    if (cI >= 0) {
+            // 交换当前元素和前一个元素
+            videoModel.move(cI +1, cI, 1);
+            // 更新 currentIndex 以保持选中状态
+            content.videoList.cutView.cutList.currentIndex = cI + 1;
+        }
+}
