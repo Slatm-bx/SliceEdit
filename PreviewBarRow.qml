@@ -1,6 +1,6 @@
 //视频预览条部分
 
-import QtQuick 2.15
+import QtQuick
 import QtQuick.Layouts
 
 Rectangle {

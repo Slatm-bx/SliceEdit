@@ -3,10 +3,14 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
+import "cutViewControl.js" as CutViewControl
 
 ColumnLayout{
     property alias textrec:_listtext
     property alias listrec:_listrec
+    property alias cutView:_cutView
+
     spacing:0
     Rectangle{
         id:_listtext
@@ -28,10 +32,16 @@ ColumnLayout{
         border.color: "black"
         color:"#333"
 
+        CutView{
+            id:_cutView
+            anchors.fill:parent
+        }
+
         Text{
             anchors.centerIn :parent
             text:"视频切片的列表"
             color:"white"
+            visible: cutView.thumbnailData.count>0? false:true
         }
     }
 }

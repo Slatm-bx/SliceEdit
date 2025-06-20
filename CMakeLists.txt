@@ -23,6 +23,8 @@ qt_add_qml_module(
   main.cpp
   videoshot.h
   videoshot.cpp
+  worker.h
+  worker.cpp
   QML_FILES
   Main.qml
   QML_FILES Content.qml
@@ -35,7 +37,9 @@ qt_add_qml_module(
   QML_FILES VideoList.qml
   QML_FILES VideoParams.qml
   QML_FILES VideoPlayer.qml
-  QML_FILES Menus.qml)
+  QML_FILES Menus.qml
+  QML_FILES CutView.qml
+  QML_FILES cutViewControl.js)
 
 
 target_compile_features(appVideoedit PRIVATE cxx_std_23)

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtMultimedia
+import "cutViewControl.js" as CutViewControl
 
 ColumnLayout{
     property alias player :_player
@@ -58,16 +59,16 @@ ColumnLayout{
             id:_videoOutput
             anchors.fill:parent
             fillMode: VideoOutput.PreserveAspectFit  // 保持比例，适应容器（可能留黑边）
-            MouseArea {
-                anchors.fill: parent
-                onDoubleClicked: {
+            TapHandler {
+                onDoubleTapped: {
                     if (root.visibility === Window.FullScreen)
                         root.visibility = Window.Windowed
                     else
                         root.showFullScreen()
                 }
+                exclusiveSignals:TapHandler.SingleTap |TapHandler. DoubleTap
 
-                onClicked: {
+                onSingleTapped:{
                     if (_player.playing) _player.pause()
                     else _player.play()
                 }
@@ -85,16 +86,8 @@ ColumnLayout{
     RowLayout{
         id:_vrow
             Label{
-                text: formatTime(_player.position) + " / " + formatTime(_player.duration)
+                text: CutViewControl.formatTime(_player.position) + " / " + CutViewControl.formatTime(_player.duration)
                 color:"white"
-                function formatTime(ms) {
-                       if (!ms) return "00:00";
-                       var seconds = Math.floor(ms / 1000);
-                       var minutes = Math.floor(seconds / 60);
-                       seconds = seconds % 60;
-                       return (minutes < 10 ? "0" + minutes : minutes) + ":" +
-                              (seconds < 10 ? "0" + seconds : seconds);
-                   }
             }
 
             // 中间：进度条滑块

@@ -2,9 +2,12 @@ import QtQuick
 import QtMultimedia
 import QtQuick.Layouts
 import QtQuick.Controls
+import "cutViewControl.js" as CutViewControl
 
 Item {
     property alias videoPlayer: _VP
+    property alias videoList: _VL
+
     // 主布局
     id:content
     ColumnLayout {
@@ -26,6 +29,7 @@ Item {
                 }
 
                 VideoList{
+                    id:_VL
                     listrec.width: parent.width
                     listrec.height:parent.height - _menusrow.implicitHeight - textrec.height
                 }
@@ -37,12 +41,27 @@ Item {
                     fileOpen{
                         onAccepted: {
                             _VP.player.stop()
-
                             timeline.playerslider.source=dialogs.fileOpen.selectedFile
                         }
                     }
-                }
+                    saveDialog{
+                        onAccepted: {
+                            //读取thumbnailData，进行剪切
+                            let data=videoList.cutView.thumbnailData;
+                            let view=videoList.cutView;
 
+                            let outFileName=CutViewControl.removeFileExtension(String(_VP.dialogs.saveDialog.selectedFile))+"."+_VP.dialogs.saveDialog.defaultSuffix;//_VP.dialogs.saveDialog.saveDialog.
+                            let inFileName=String(data.get(view.currentIndex).videoUrl);
+                            console.log("outFileName: ",outFileName,"inFileName: ",inFileName);
+
+                            let stime=data.get(view.currentIndex).startTime/1000
+                            let etime=Number(data.get(view.currentIndex).endTime)/1000
+
+                            console.log("stime: ",stime,"etime: ",etime);
+                            Worker.cutOneVideo(stime,etime,inFileName,outFileName);
+                        }
+                    }
+                }
             }
 
             VideoParams{

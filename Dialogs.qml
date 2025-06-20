@@ -1,9 +1,10 @@
-import QtQuick 2.15
+import QtQuick
 import QtQuick.Dialogs
 
 Item {
     property alias fileOpen: _fileOpen
     property alias about:_about
+    property alias saveDialog:_saveDialog
 
     FileDialog{
         id:_fileOpen
@@ -18,6 +19,14 @@ Item {
         buttons: MessageDialog.Ok
         text:"Video Player"
         informativeText: "This is a video edit.Powered by Qt"
+    }
+
+    FileDialog{
+        id:_saveDialog
+        title:"save video"
+        currentFolder: "./"
+        fileMode:FileDialog.SaveFile
+        nameFilters: ["Vidoe File(*.mp4 *avi *mkv)"]
     }
 }
 

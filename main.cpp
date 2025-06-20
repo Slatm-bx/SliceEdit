@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-
+#include "worker.h"
 int main(
     int argc, char *argv[])
 {
@@ -14,7 +14,8 @@ int main(
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
-
+    Worker w{};
+    engine.rootContext()->setContextProperty("Worker", &w);
     engine.loadFromModule("Videoedit", "Main");
 
     return app.exec();
