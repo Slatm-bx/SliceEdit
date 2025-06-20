@@ -1,7 +1,7 @@
 #include "videoshot.h"
 #include <iostream>
 #include <thread>
-#include <functional>
+// #include <functional>
 #include <mutex>
 #include <QDir>
 
@@ -9,7 +9,7 @@ extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libswscale/swscale.h" //格式转换库
-#include "libavutil/imgutils.h"
+// #include "libavutil/imgutils.h"
 }
 
 VideoShot::VideoShot(

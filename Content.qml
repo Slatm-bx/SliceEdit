@@ -2,6 +2,7 @@ import QtQuick
 import QtMultimedia
 import QtQuick.Layouts
 import QtQuick.Controls
+import "previewbarrow.js" as PreviewBarRowControl
 
 Item {
     property alias videoPlayer: _VP
@@ -38,7 +39,7 @@ Item {
                         onAccepted: {
                             _VP.player.stop()
 
-                            timeline.playerslider.source=dialogs.fileOpen.selectedFile
+                            timeline.playerSlider.source=dialogs.fileOpen.selectedFile
                         }
                     }
                 }
@@ -53,25 +54,36 @@ Item {
 
         PreviewBarControlRow{
             id:_lrow
+            startCut{
+                onClicked:PreviewBarRowControl.startCutFunction()
+            }
+            endCut{
+                onClicked: PreviewBarRowControl.endCutFunction()
+            }
         }
 
         PreviewBarRow{
             id: timeline
             height: (1*root.height)/3 - _lrow.implicitHeight
             width:root.width
-            playerslider{
+            playerSlider{
                 videoshot{
                     onShotFinished: {//截图后再加载视频 反过来不好处理
-                        _VP.player.source=playerslider.source
+                        _VP.player.source=playerSlider.source
                         _VP.player.play()
                     }
                 }
                 to:_VP.player.duration
                 value: _VP.player.position
                 onMoved: {
-                    _VP.player.position=playerslider.value
+                    _VP.player.position=playerSlider.value
+                    if(timeline.playerSlider.tmpCut.startTime>playerSlider.value)PreviewBarRowControl.endCutFunction()
                 }
                 enabled: _VP.player.source!=""
+                onSourceChanged: {
+                    PreviewBarRowControl.clearCutFunction()
+                }
+
             }
         }
     }

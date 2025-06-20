@@ -58,16 +58,15 @@ ColumnLayout{
             id:_videoOutput
             anchors.fill:parent
             fillMode: VideoOutput.PreserveAspectFit  // 保持比例，适应容器（可能留黑边）
-            MouseArea {
-                anchors.fill: parent
-                onDoubleClicked: {
+            TapHandler {
+                onDoubleTapped: {
                     if (root.visibility === Window.FullScreen)
                         root.visibility = Window.Windowed
                     else
                         root.showFullScreen()
                 }
 
-                onClicked: {
+                onTapped:  {
                     if (_player.playing) _player.pause()
                     else _player.play()
                 }

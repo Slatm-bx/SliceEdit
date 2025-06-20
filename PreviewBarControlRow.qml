@@ -1,15 +1,19 @@
 //对视频预览条部分的操作
 
-import QtQuick 2.15
+import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
 RowLayout {
+    property alias startCut: _startCut
+    property alias endCut: _endCut
+
     spacing: 5
     id:_lrow
     Button {
+        id:_startCut
         text: "▶️"
-        onClicked: console.log("隐式宽度:", implicitWidth, "隐式高度:", implicitHeight)
+
         // 设置按钮的宽度和高度为 RowLayout 的高度
                 Layout.preferredWidth: 30
                 Layout.preferredHeight: 30
@@ -25,8 +29,9 @@ RowLayout {
     }
 
     Button {
+        id:_endCut
         text: "⏹"
-        onClicked: videoPlayer.pause()
+        //onClicked: videoPlayer.pause()
         //设置按钮的宽度和高度为 RowLayout 的高度
                 Layout.preferredWidth: 30
                 Layout.preferredHeight: 30

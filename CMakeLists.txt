@@ -35,7 +35,8 @@ qt_add_qml_module(
   QML_FILES VideoList.qml
   QML_FILES VideoParams.qml
   QML_FILES VideoPlayer.qml
-  QML_FILES Menus.qml)
+  QML_FILES Menus.qml
+  QML_FILES previewbarrow.js)
 
 
 target_compile_features(appVideoedit PRIVATE cxx_std_23)
