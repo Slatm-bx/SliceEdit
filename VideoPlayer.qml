@@ -67,7 +67,6 @@ ColumnLayout{
                         root.showFullScreen()
                 }
                 exclusiveSignals:TapHandler.SingleTap |TapHandler. DoubleTap
-
                 onSingleTapped:{
                     if (_player.playing) _player.pause()
                     else _player.play()

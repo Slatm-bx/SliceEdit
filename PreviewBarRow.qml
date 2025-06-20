@@ -2,10 +2,11 @@
 
 import QtQuick
 import QtQuick.Layouts
+import "previewbarrow.js" as PreviewBarRowControl
+
 
 Rectangle {
     property alias playerSlider: _playerslider
-
     id: timeline
     Layout.fillHeight:true
     Layout.fillWidth: true

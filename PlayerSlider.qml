@@ -19,7 +19,7 @@ Slider {
         id:overallProgress
         x: playerSlider.leftPadding
         y: playerSlider.topPadding + playerSlider.availableHeight / 2 - height / 2
-        z:0
+        z:-3
         width: playerSlider.width
         height: playerSlider.height
         radius: 2
@@ -34,18 +34,17 @@ Slider {
                 else return "正在加载";
             }
         }
-
     }
 
+    // Rectangle {
+    //     id:progress
+    //     opacity : 0.3
+    //     width: playerSlider.visualPosition * parent.width
+    //     height: parent.height
+    //     color:"red"
+    //     radius: 2
+    // }
 
-    Rectangle {
-        id:progress
-        opacity : 0.3
-        width: playerSlider.visualPosition * parent.width
-        height: parent.height
-        color:"red"
-        radius: 2
-    }
     handle: Rectangle {
         id: playhead
         width: 2; height: parent.height
@@ -58,27 +57,23 @@ Slider {
 
     ListView{
         id:_imageList
-        z:-1
+        z:-2
         anchors.fill:parent
-        model:playerSlider.dataModel
-        delegate:segment
-        orientation:ListView.Horizontal
-    }
-
-    ListModel {
-        //包含图片url,起始时间，终止时间
-        id:_dataModel
-    }
-    Component {
-        id: segment
-        Image {
-            width:200
-            height:150
-            id:thumbnail
-            cache: false
-            fillMode : Image.PreserveAspectFit
-            source:model.pictureUrl
+        model:ListModel {
+            id:_dataModel
         }
+        delegate:Component {
+            id: segment
+            Image {
+                width:200
+                height:150
+                id:thumbnail
+                cache: false
+                fillMode : Image.PreserveAspectFit
+                source:model.pictureUrl
+            }
+        }
+        orientation:ListView.Horizontal
     }
 
     onWidthChanged: {
@@ -97,12 +92,10 @@ Slider {
     }
 
     property alias videoshot: _videoshot
-    VideoShot{
+    VideoShot{//视频预览图
         id:_videoshot
-        property string tmppath
         Component.onCompleted: {
             outputPath=tmpPath()+"/VideoShot/";
-
         }
 
 
@@ -110,7 +103,6 @@ Slider {
             dataModel.clear()
             for(let i=0;i<imageNum;i++){
                 dataModel.append({"pictureUrl":"file://"+outputPath+"frame"+i+".jpg"});
-                //console.log("读取:","file://"+outputPath+"frame"+i+".jpg")
             }
         }
     }
@@ -121,4 +113,25 @@ Slider {
         }
     }
 
+    property alias tmpCut: _tmpCut
+    Rectangle{
+        property int startTime
+        anchors.top: parent.top
+        id:_tmpCut
+        color: "#00ffff"
+        opacity : 0.3
+        visible: false
+        x:0
+        width: playerSlider.visualPosition * playerSlider.width-x
+        height: parent.height
+    }
+
+    property alias cutList: _cutList
+
+    Item{
+        id:_cutList
+        property int sliderWidth: playerSlider.width
+        property int cutNum: 0
+        property var cuts:({})
+    }
 }

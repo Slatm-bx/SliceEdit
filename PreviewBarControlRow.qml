@@ -6,7 +6,9 @@ import QtQuick.Layouts
 import "cutViewControl.js" as CutViewControl
 
 RowLayout {
+
     property alias stratCutButton:_stratCutButton
+    property alias endCutButton:_endCutButton
     spacing: 5
     id:_lrow
     Button {
@@ -17,6 +19,7 @@ RowLayout {
             console.log("loadStartTime");
             CutViewControl.loadStartTime();
         }
+
 
         //onClicked: console.log("隐式宽度:", implicitWidth, "隐式高度:", implicitHeight)
         // 设置按钮的宽度和高度为 RowLayout 的高度
@@ -34,12 +37,15 @@ RowLayout {
     }
 
     Button {
+
         id:_endCutButton
         text: "⏹"
         enabled: false
         onClicked: {
             CutViewControl.loadEndTime();
         }
+
+
         //设置按钮的宽度和高度为 RowLayout 的高度
         Layout.preferredWidth: 30
         Layout.preferredHeight: 30

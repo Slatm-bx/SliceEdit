@@ -27,20 +27,34 @@ qt_add_qml_module(
   worker.cpp
   QML_FILES
   Main.qml
-  QML_FILES Content.qml
-  QML_FILES Actions.qml
-  QML_FILES Dialogs.qml
-  QML_FILES Player.qml
-  QML_FILES PreviewBarRow.qml
-  QML_FILES PlayerSlider.qml
-  QML_FILES PreviewBarControlRow.qml
-  QML_FILES VideoList.qml
-  QML_FILES VideoParams.qml
-  QML_FILES VideoPlayer.qml
-  QML_FILES Menus.qml
-  QML_FILES CutView.qml
-  QML_FILES cutViewControl.js)
-
+  QML_FILES
+  Content.qml
+  QML_FILES
+  Actions.qml
+  QML_FILES
+  Dialogs.qml
+  QML_FILES
+  Player.qml
+  QML_FILES
+  PreviewBarRow.qml
+  QML_FILES
+  PlayerSlider.qml
+  QML_FILES
+  PreviewBarControlRow.qml
+  QML_FILES
+  VideoList.qml
+  QML_FILES
+  VideoParams.qml
+  QML_FILES
+  VideoPlayer.qml
+  QML_FILES
+  Menus.qml
+  QML_FILES
+  CutView.qml
+  QML_FILES
+  cutViewControl.js
+  QML_FILES
+  previewbarrow.js)
 
 target_compile_features(appVideoedit PRIVATE cxx_std_23)
 

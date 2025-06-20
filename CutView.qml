@@ -6,6 +6,7 @@ import QtQml//Component
 import QtQuick.Layouts
 import QtQuick.Controls//ToolBar
 import "cutViewControl.js" as CutViewControl
+import "previewbarrow.js" as PreviewBarRowControl
 
 Rectangle{
     id:root
@@ -23,7 +24,7 @@ Rectangle{
         Rectangle{
             id:chapter
             visible:true
-            width:parent.width
+            width:_cutList.width
             height:100
             color: ListView.isCurrentItem?"#e0ffff":"white"
             property int cutId:model.cutId
@@ -130,11 +131,16 @@ Rectangle{
                         MenuItem {
                             text: "删除选中项"
                             onTriggered:{
+                                PreviewBarRowControl.deleteOneCutFunction(root.thumbnailData.get(root.cutList.currentIndex).cutId)
                                 root.thumbnailData.remove(root.cutList.currentIndex);
                             }
                         }
                         MenuItem { text: "删除所有项"
                             onTriggered:{
+                                for(let i=0;i<root.cutList.count;i++){
+                                    PreviewBarRowControl.deleteOneCutFunction(root.thumbnailData.get(i).cutId)
+                                }
+
                                 root.thumbnailData.clear();
                             }
                         }

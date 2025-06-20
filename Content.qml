@@ -3,6 +3,7 @@ import QtMultimedia
 import QtQuick.Layouts
 import QtQuick.Controls
 import "cutViewControl.js" as CutViewControl
+import "previewbarrow.js" as PreviewBarRowControl
 
 Item {
     property alias videoPlayer: _VP
@@ -59,6 +60,7 @@ Item {
 
                             console.log("stime: ",stime,"etime: ",etime);
                             Worker.cutOneVideo(stime,etime,inFileName,outFileName);
+
                         }
                     }
                 }
@@ -72,6 +74,12 @@ Item {
 
         PreviewBarControlRow{
             id:_lrow
+            stratCutButton{
+                onClicked:PreviewBarRowControl.startCutFunction()
+            }
+            endCutButton{
+                onClicked: PreviewBarRowControl.endCutFunction()
+            }
         }
 
         PreviewBarRow{
@@ -89,8 +97,13 @@ Item {
                 value: _VP.player.position
                 onMoved: {
                     _VP.player.position=playerSlider.value
+                    if(timeline.playerSlider.tmpCut.startTime>playerSlider.value)PreviewBarRowControl.endCutFunction()
                 }
                 enabled: _VP.player.source!=""
+                // onSourceChanged: {
+                //     PreviewBarRowControl.clearCutFunction()
+                // }
+
             }
         }
     }
