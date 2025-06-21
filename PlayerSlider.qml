@@ -17,8 +17,8 @@ Slider {
     value: 0.5
     background: Rectangle {
         id:overallProgress
-        x: playerSlider.leftPadding
-        y: playerSlider.topPadding + playerSlider.availableHeight / 2 - height / 2
+        // x: playerSlider.leftPadding
+        // y: playerSlider.topPadding + playerSlider.availableHeight / 2 - height / 2
         z:-3
         width: playerSlider.width
         height: playerSlider.height
@@ -44,14 +44,13 @@ Slider {
     //     color:"red"
     //     radius: 2
     // }
-
+    property alias playhead:_playhead
     handle: Rectangle {
-        id: playhead
+        id: _playhead
         width: 2; height: parent.height
-        x: playerSlider.visualPosition*playerSlider.width // 绑定位置
+        x: playerSlider.visualPosition*playerSlider.width  // 绑定位置
         color: playerSlider.pressed ? "#6495ed" : "#00ffff"
     }
-
     property alias imageList:_imageList
     property alias dataModel:_dataModel
 
@@ -113,16 +112,21 @@ Slider {
         }
     }
 
+    //开始裁剪时的蓝色矩形
     property alias tmpCut: _tmpCut
     Rectangle{
-        property int startTime
+        property int startTime:0//meadiaPlayer的一次position
         anchors.top: parent.top
         id:_tmpCut
         color: "#00ffff"
         opacity : 0.3
         visible: false
         x:0
-        width: playerSlider.visualPosition * playerSlider.width-x
+        width:playerSlider.visualPosition * playerSlider.width-x//<0 ? 0:playerSlider.visualPosition * playerSlider.width-x
+        // {
+        //     let w=playerSlider.visualPosition * playerSlider.width-x
+        //     if(w<0) return 0; else return w;
+        // }
         height: parent.height
     }
 
@@ -131,7 +135,8 @@ Slider {
     Item{
         id:_cutList
         property int sliderWidth: playerSlider.width
-        property int cutNum: 0
+        //property int cutNum: 0//让他绑定到_stratCutButton的count属性。
+        property int cutNum: lrow.stratCutButton.count
         property var cuts:({})
     }
 }

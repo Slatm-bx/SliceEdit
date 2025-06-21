@@ -9,10 +9,10 @@ import "cutViewControl.js" as CutViewControl
 import "previewbarrow.js" as PreviewBarRowControl
 
 Rectangle{
-    id:root
+    //id:root
     property alias thumbnailData:_thumbnailData
     property alias chapterDelegate:_chapterDelegate
-    property alias cutList:_cutList
+    property alias cutListView:_cutListView
 
     color:"#333"
     ListModel{
@@ -24,7 +24,7 @@ Rectangle{
         Rectangle{
             id:chapter
             visible:true
-            width:_cutList.width
+            width:_cutListView.width
             height:100
             color: ListView.isCurrentItem?"#e0ffff":"white"
             property int cutId:model.cutId
@@ -75,14 +75,17 @@ Rectangle{
                 }
             }
             TapHandler{
-              onTapped: (event,button)=>{
-                  root.cutList.currentIndex = index;
-                 if(button===Qt.RightButton) {
-                             contextMenu.open();
-                        }
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onTapped: (event,button)=>{
+                    cutListView.currentIndex = index;
+                    //更新播放位置
+                    videoPlayer.player.position=model.startTime;
+                    if(button===Qt.RightButton) {
+                        contextMenu.popup(100,200,chapter);//position//pressPosition//globalPosition
+                                  //contextMenu.popup(pressX,pressY);
                     }
+                }
             }
-
         }
     }
     ColumnLayout{
@@ -92,11 +95,11 @@ Rectangle{
             clip: true
             Layout.fillWidth:true
             Layout.fillHeight:true
-            // Layout.preferredHeight: root.height
-            // Layout.preferredWidth: root.width
-            id:_cutList
-            model:root.thumbnailData
-            delegate:root.chapterDelegate
+            // Layout.preferredHeight: height
+            // Layout.preferredWidth: width
+            id:_cutListView
+            model:thumbnailData
+            delegate:chapterDelegate
             moveDisplaced: Transition {
                     NumberAnimation { properties: "x,y"; duration: 1000 }
             }
@@ -113,7 +116,7 @@ Rectangle{
                     onClicked: {
                         //打开保存文件对话框
                         let saveDialog=videoPlayer.dialogs.saveDialog;
-                        saveDialog.defaultSuffix=String(CutViewControl.getFileExtension(thumbnailData.get(cutList.currentIndex).videoUrl));//得到当前modeElement的videoUrl
+                        saveDialog.defaultSuffix=String(CutViewControl.getFileExtension(thumbnailData.get(cutListView.currentIndex).videoUrl));//得到当前modeElement的videoUrl
                         console.log("saveDialog.defaultSuffix: ",saveDialog.defaultSuffix);
                         saveDialog.open();
                     }//执行C++代码
@@ -124,36 +127,55 @@ Rectangle{
                     text: qsTr("操作切片")
                     onClicked: {
                         //显示上下文菜单
-                        contextMenu.open();
+                        contextMenu.popup(pressX,pressY);
                     }
                     Menu {
                         id: contextMenu
-                        x :deleteButton.x + deleteButton.width - contextMenu.width
-                        y :deleteButton.y + deleteButton.height
-                        width:toolBar.width
+                        width:toolBar.width//
                         MenuItem {
                             text: "删除选中项"
                             onTriggered:{
-                                PreviewBarRowControl.deleteOneCutFunction(root.thumbnailData.get(root.cutList.currentIndex).cutId)
-                                root.thumbnailData.remove(root.cutList.currentIndex);
+                                let data=thumbnailData.get(cutListView.currentIndex);
+                                if(data.endTime===-1){//当删除缺少时间的切片时
+                                    //关闭蓝色矩形
+                                    timeline.playerSlider.tmpCut.visible=false;
+                                    //恢复未切片状态
+                                    lrow.stratCutButton.enabled=true;
+                                    lrow.endCutButton.enabled=false;
+                                    thumbnailData.remove(cutListView.currentIndex);
+                                    timeline.playerSlider.tmpCut.startTime=0;
+                                }else{
+                                    PreviewBarRowControl.deleteOneCutFunction(data.cutId)
+                                    thumbnailData.remove(cutListView.currentIndex);
+                                }
                             }
                         }
                         MenuItem { text: "删除所有项"
                             onTriggered:{
-                                for(let i=0;i<root.cutList.count;i++){
-                                    PreviewBarRowControl.deleteOneCutFunction(root.thumbnailData.get(i).cutId)
+                                let data;
+                                for(let i=0;i<cutListView.count;i++){
+                                    data=thumbnailData.get(i);
+                                    //如果红色矩形存在
+                                    if(data.endTime!=-1)PreviewBarRowControl.deleteOneCutFunction(data.cutId);
+                                    else {
+                                        timeline.playerSlider.tmpCut.visible=false;
+                                        //恢复未切片状态
+                                        lrow.stratCutButton.enabled=true;
+                                        lrow.endCutButton.enabled=false;
+                                        //更新
+                                        timeline.playerSlider.tmpCut.startTime=0;
+                                    }
                                 }
-
-                                root.thumbnailData.clear();
+                                thumbnailData.clear();
                             }
                         }
                         MenuItem {
                             text: "向上移"
-                            visible: cutList.currentIndex === 0 ? false :true
+                            visible: cutListView.currentIndex === 0 ? false :true
                             onTriggered:CutViewControl.moveClipUp()
                         }
                         MenuItem {
-                            visible:cutList.currentIndex === cutList.count -1 ?false :true
+                            visible:cutListView.currentIndex === cutListView.count -1 ?false :true
                             text: "向下移"
                             onTriggered:CutViewControl.moveClipDown()
                         }

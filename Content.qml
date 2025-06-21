@@ -9,6 +9,8 @@ Item {
     property alias videoPlayer: _VP
     property alias videoList: _VL
     property alias timeline: _timeline
+    property alias lrow:_lrow
+
     // 主布局
     id:content
     ColumnLayout {
@@ -64,6 +66,20 @@ Item {
                         }
                     }
                 }
+                progressSlider{
+                    value: Math.max(_VP.player.position,timeline.playerSlider.tmpCut.startTime)
+                    onMoved: {
+                        if(progressSlider.value<timeline.playerSlider.tmpCut.startTime){
+                            _VP.player.position=timeline.playerSlider.tmpCut.startTime;
+                            //progressSlider.value=timeline.playerSlider.tmpCut.startTime;
+                            //playerSlider.value=playerSlider.tmpCut.startTime;
+                            //_VP.player.position=playerSlider.tmpCut.startTime;
+                        }else{
+                            _VP.player.position=progressSlider.value;
+                        }
+
+                    }
+                }
             }
 
             VideoParams{
@@ -74,6 +90,7 @@ Item {
 
         PreviewBarControlRow{
             id:_lrow
+            //两个button的onClicked:在不同文件中拓充了函数，但二者函数涉及的数据没有重叠，执行顺序不会影响结果
             stratCutButton{
                 onClicked:PreviewBarRowControl.startCutFunction()
             }
@@ -94,16 +111,38 @@ Item {
                     }
                 }
                 to:_VP.player.duration
-                value: _VP.player.position
+                //value:_VP.player.position
+                value: Math.max(_VP.player.position,playerSlider.tmpCut.startTime)//? _VP.player.position:playerSlider.tmpCut.startTime
+                //property real vl:playerSlider.value
+                // value:{
+                //     if(_VP.player.position<playerSlider.tmpCut.startTime){
+                //         return playerSlider.tmpCut.startTime
+                //     }else{
+                //         return _VP.player.position
+                //     }
+                // }
+
+                // onValueChanged: {
+                //     if(playerSlider.value<playerSlider.tmpCut.startTime){
+                //         playerSlider.value=playerSlider.tmpCut.startTime
+                //     }else{
+                //         playerSlider.value=_VP.player.position
+                //     }
+                // }
                 onMoved: {
-                    _VP.player.position=playerSlider.value
-                    if(timeline.playerSlider.tmpCut.startTime>playerSlider.value)PreviewBarRowControl.endCutFunction()
+                    if(playerSlider.value<playerSlider.tmpCut.startTime){
+                        _VP.player.position=playerSlider.tmpCut.startTime;
+                        //playerSlider.value=playerSlider.tmpCut.startTime;
+                        //_VP.player.position=playerSlider.tmpCut.startTime;
+                    }else{
+                        _VP.player.position=playerSlider.value;
+                    }
+                    //if(timeline.playerSlider.tmpCut.startTime>playerSlider.value)PreviewBarRowControl.endCutFunction()
                 }
                 enabled: _VP.player.source!=""
                 // onSourceChanged: {
                 //     PreviewBarRowControl.clearCutFunction()
                 // }
-
             }
         }
     }

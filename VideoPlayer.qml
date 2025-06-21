@@ -10,6 +10,8 @@ ColumnLayout{
     property alias player :_player
     property alias dialogs : _dialogs
     property alias videoOutput:_videoOutput
+    property alias progressSlider: progressSlider
+
     spacing:0
     Layout.fillWidth: true
     Layout.fillHeight: true
@@ -18,6 +20,7 @@ ColumnLayout{
     Player{
         id:_player
         videoOutput: _videoOutput
+
         onErrorChanged: {
             console.error("MediaPlayer 错误:", errorString)  // 打印具体错误
         }
@@ -97,9 +100,9 @@ ColumnLayout{
             to:_player.duration
             value: _player.position
 
-            onMoved: {//仅在拖动时触发
-                _player.position=value
-            }
+            // onMoved: {//仅在拖动时触发
+            //     _player.position=value
+            // }
         }
         RowLayout {
                     spacing: 5

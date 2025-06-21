@@ -32,18 +32,43 @@ function loadStartTime(){
         _stratCutButton.count++;
         _stratCutButton.enabled=false;
         _endCutButton.enabled=true;
+        startCutFunction();
         //需要禁用拖放功能
     })
 }
+
+function findElementIndex(model){
+    for(let i=0;i<model.count;i++){
+        if(model.get(i).cutId===_stratCutButton.count-1){
+            return i;
+        }
+    }
+    return -1;
+}
+
+
 function loadEndTime(){
     //更新当前视图项
     let model=videoList.cutView.thumbnailData
-    model.set(model.count-1,{"endTime":videoPlayer.player.position});//当没有设置endtime时，会对拖放操作造成影响
-    if(model.get(model.count-1).startTime>model.get(model.count-1).endTime) {
+
+    //找到对应element
+    let index=findElementIndex(model);
+    if(index===-1) {
+        //该项不存在 打开对话框
+        videoPlayer.dialogs.deleteInMiddleDialog.open();
+        //设置按钮属性
+        _stratCutButton.enabled=true;
+        _endCutButton.enabled=false;
+        return;
+    }
+
+    if(model.get(index).startTime>videoPlayer.player.position) {
         let cutErrorDialog=videoPlayer.dialogs.cutErrorDialog;
         cutErrorDialog.open();
         return;
     }
+    model.set(index,{"endTime":videoPlayer.player.position});
+
     //model.get(model.count-1).endTime=videoPlayer.player.position;
     //将stratCut设置为true
     _stratCutButton.enabled=true;
@@ -61,22 +86,22 @@ function formatTime(ms) {
 
 function moveClipUp(){
     let videoModel = content.videoList.cutView.thumbnailData;
-    let cI = content.videoList.cutView.cutList.currentIndex;
+    let cI = content.videoList.cutView.cutListView.currentIndex;
     if (cI >= 0) {
             // 交换当前元素和前一个元素
             videoModel.move(cI, cI - 1, 1);
             // 更新 currentIndex 以保持选中状态
-            content.videoList.cutView.cutList.currentIndex = cI - 1;
+            content.videoList.cutView.cutListView.currentIndex = cI - 1;
         }
 }
 
 function moveClipDown(){
     let videoModel = content.videoList.cutView.thumbnailData;
-    let cI = content.videoList.cutView.cutList.currentIndex;
+    let cI = content.videoList.cutView.cutListView.currentIndex;
     if (cI >= 0) {
             // 交换当前元素和前一个元素
             videoModel.move(cI +1, cI, 1);
             // 更新 currentIndex 以保持选中状态
-            content.videoList.cutView.cutList.currentIndex = cI + 1;
+            content.videoList.cutView.cutListView.currentIndex = cI + 1;
         }
 }

@@ -6,6 +6,8 @@ Item {
     property alias about:_about
     property alias saveDialog:_saveDialog
     property alias cutErrorDialog:_cutError
+    property alias deleteInMiddleDialog:_deleteInMiddle
+
     FileDialog{
         id:_fileOpen
         title: "Select video file"
@@ -35,6 +37,14 @@ Item {
         buttons: MessageDialog.Ok
         text:"Video Player"
         informativeText: "The selected time is incorrect."
+    }
+
+    MessageDialog{
+        id:_deleteInMiddle
+        title: "delete In Middle"
+        buttons: MessageDialog.Ok
+        text:"Video Player"
+        informativeText: "The chapter is deleted."
     }
 }
 

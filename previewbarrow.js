@@ -7,30 +7,37 @@ function startCutFunction() {
     _tmpCut.visible=true
 }
 
+// function abc(){
+
+// }
+
+
+
 //别动代码极易报错
 function endCutFunction(){
     let _tmpCut=timeline.playerSlider.tmpCut
     let playerSlider=timeline.playerSlider
-    _tmpCut.visible=false
 
     let startTime=_tmpCut.startTime,endTime=videoPlayer.player.position
     if(endTime<startTime)return
+    _tmpCut.visible=false
     let str=`import QtQuick
 
     Rectangle {
             z:-1
             property int startTime:`+_tmpCut.startTime+`
             property int endTime:`+videoPlayer.player.position+`
-            property int cutId:`+(playerSlider.cutList.cutNum)+`
+            property int cutId:`+(playerSlider.cutList.cutNum-1)+`//-1
             height: `+playerSlider.height+`
             x:parent.sliderWidth*`+startTime/playerSlider.to+`
             width: parent.sliderWidth*`+(endTime-startTime)/playerSlider.to+`
             color: "red"
             opacity : 0.3
     }`
-    timeline.playerSlider.cutList.cuts[playerSlider.cutList.cutNum]=Qt.createQmlObject(str,timeline.playerSlider.cutList
+    timeline.playerSlider.cutList.cuts[playerSlider.cutList.cutNum-1]=Qt.createQmlObject(str,timeline.playerSlider.cutList
                  )
-    playerSlider.cutList.cutNum++
+    timeline.playerSlider.tmpCut.startTime=0;
+    //使用 property var cuts: ({}) 定义一个属性时，实际上创建的是一个空对象（Object），而不是数组。
 }
 
 // function clearCutFunction(){
@@ -43,7 +50,8 @@ function endCutFunction(){
 // }
 
 function deleteOneCutFunction(cutId){
-    let cutList=timeline.playerSlider.cutList
+    //如果是有结束时间的切片
+    let cutList=timeline.playerSlider.cutList//用于存储红色矩形的对象
     console.log("删除:"+cutId)
     if(cutId<cutList.cutNum && cutId>=0)cutList.cuts[cutId].destroy()
 }
