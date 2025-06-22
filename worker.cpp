@@ -1,6 +1,8 @@
 #include "worker.h"
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <QFileInfo>
 #include <QString>
 #include <QUrl>
 extern "C" {
@@ -15,12 +17,11 @@ Worker::Worker(QObject *parent) : QObject{parent} {}
 void Worker::cutOneVideo(double startime,
                          double endtime,
                          QUrl inName,
-                         QUrl outName) //QUrl inName, QUrl outName) //QString inName,QString outName
+                         // QUrl outName)
+                         QString outName) //QUrl inName, QUrl outName) //QString inName,QString outName
 {
     std::string infileName = inName.toLocalFile().toStdString();
-    std::string outfileName = outName.toLocalFile().toStdString();
-    // std::string infileName = inName.toStdString();
-    // std::string outfileName = outName.toStdString();
+    std::string outfileName = outName.toStdString();
     std::cout << "infileName: " << infileName << " outfileName: " << outfileName << std::endl;
 
     //
@@ -44,7 +45,7 @@ void Worker::cutOneVideo(double startime,
     av_dump_format(ifmt_ctx, 0, "", 0);
 
     //构建输出AVFormatContext
-    ofmt = ifmt_ctx->oformat;
+    // ofmt = ifmt_ctx->oformat;
     AVFormatContext *ofmt_ctx = nullptr;
     avformat_alloc_output_context2(&ofmt_ctx,
                                    nullptr,
@@ -82,13 +83,6 @@ void Worker::cutOneVideo(double startime,
         return;
     }
 
-    // 7. 剪辑逻辑：定位到起始时间并写入数据
-    // 将时间转换为输入流的时间基（假设使用第一个流作为参考）
-    AVStream *in_stream = ifmt_ctx->streams[0];
-    int64_t start_ts = (int64_t) (startime / av_q2d(in_stream->time_base)); //得到时间戳;
-    int64_t end_ts = (int64_t) (endtime / av_q2d(in_stream->time_base));
-    // std::cout << "时间基: " << av_q2d(in_stream->time_base) << std::endl;
-    // std::cout << "end_ts: " << end_ts * av_q2d(in_stream->time_base) << std::endl;
     // 定位到起始时间附近的关键帧startime * AV_TIME_BASE, AVSEEK_FLAG_ANY)
     if ((ret = av_seek_frame(ifmt_ctx, -1, startime * AV_TIME_BASE, AVSEEK_FLAG_BACKWARD)) < 0) {
         fprintf(stderr, "定位失败: %s\n", av_err2str(ret));
@@ -100,8 +94,9 @@ void Worker::cutOneVideo(double startime,
     // 读取并写入数据包
     while (av_read_frame(ifmt_ctx, pkt) >= 0) {
         AVStream *in_stream = ifmt_ctx->streams[pkt->stream_index];
-        AVStream *out_stream = ofmt_ctx->streams[pkt->stream_index];
+        // AVStream *out_stream = ofmt_ctx->streams[pkt->stream_index];
 
+        int64_t start_ts = (int64_t) (startime / av_q2d(in_stream->time_base)); //得到时间戳;
         // 检查时间戳是否在剪辑范围内
         //av_compare_ts(pkt->pts, in_stream->time_base, end_ts, in_stream->time_base) >= 0//不准
         if (av_q2d(in_stream->time_base) * pkt->pts > endtime) {
@@ -110,16 +105,14 @@ void Worker::cutOneVideo(double startime,
         }
 
         // 调整时间戳（相对剪辑起点）
-        pkt->pts = av_rescale_q(pkt->pts - start_ts, in_stream->time_base, out_stream->time_base);
-        pkt->dts = av_rescale_q(pkt->dts - start_ts, in_stream->time_base, out_stream->time_base);
-        pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
+        // pkt->pts = av_rescale_q(pkt->pts - start_ts, in_stream->time_base, out_stream->time_base);
+        // pkt->dts = av_rescale_q(pkt->dts - start_ts, in_stream->time_base, out_stream->time_base);
+        // pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
+        pkt->pts = pkt->pts - start_ts;
+        pkt->dts = pkt->dts - start_ts;
+        pkt->duration = pkt->duration;
         //AVPacket 中的 duration 表示该数据包（通常包含一个压缩帧）在播放时的持续时间，其单位为对应流的时间基（time_base）
         pkt->pos = -1; // 让FFmpeg自动计算新位置
-        //调用av_interleaved_write_frame()写入数据包时：
-        //若pkt->pos == -1 → 复用器根据当前输出文件的写入位置自动分配：
-        //计算方式：基于前一个数据包的结束位置和当前数据包大小
-        //数学表示：new_pos = last_packet_end_pos + last_packet_size
-        //若pkt->pos != -1 → 复用器尝试直接写入指定位置（可能导致文件覆盖或错误）
 
         // 写入数据包
         if ((ret = av_interleaved_write_frame(ofmt_ctx, pkt)) < 0) {
@@ -137,4 +130,85 @@ void Worker::cutOneVideo(double startime,
     avformat_close_input(&ifmt_ctx);
     avformat_free_context(ofmt_ctx);
     av_packet_free(&pkt);
+}
+
+void Worker::saveAllVideos(const QVariantList &startTimes, const QVariantList &endTimes, QUrl inName, QString outName)
+{
+    QString localFile = inName.toLocalFile();
+
+    //  使用QFileInfo提取后缀
+    QFileInfo fileInfo(localFile);
+    QString suffix = fileInfo.suffix();
+
+    std::string outfileName = outName.toStdString();
+    std::cout << outfileName << '\n';
+    std::string clipsOutFile = "/tmp/VideoShot/";
+    if (startTimes.size() != endTimes.size()) {
+        qWarning() << "时间区间数量不匹配";
+        return;
+    }
+
+    // 转换为double处理
+    QVector<double> stimes, etimes;
+    for (const QVariant &st : startTimes) {
+        stimes.append(st.toDouble());
+    }
+    for (const QVariant &et : endTimes) {
+        etimes.append(et.toDouble());
+    }
+
+    QVector<QString> outputFiles; // 用于存储生成的剪辑文件名
+    for (int i = 0; i < stimes.count(); i++) {
+        QString oneoutfilename = QString::fromStdString(clipsOutFile) + "clip" + QString::number(i) + "." + suffix;
+        cutOneVideo(stimes[i], etimes[i], inName, oneoutfilename);
+        outputFiles.append(oneoutfilename); // 记录生成的文件名
+    }
+
+    std::vector<std::string> input_files;
+
+    for (const QString &filename : outputFiles) {
+        input_files.push_back(filename.toStdString());
+    }
+
+    for (const std::string &filename : input_files) {
+        std::cout << filename << '\n';
+    }
+    // 调用函数合并视频
+    if (isSaveAllVideo(outfileName, input_files)) {
+        std::cout << "操作成功！" << std::endl;
+    } else {
+        std::cerr << "操作失败！" << std::endl;
+    }
+}
+
+bool Worker::isSaveAllVideo(const std::string &output_filename, const std::vector<std::string> &input_files)
+{
+    // 1. 创建临时文件 filelist.txt
+    std::ofstream filelist("filelist.txt");
+    if (!filelist.is_open()) {
+        std::cerr << "无法创建 filelist.txt" << std::endl;
+        return false;
+    }
+
+    for (const auto &file : input_files) {
+        filelist << "file '" << file << "'" << std::endl;
+    }
+    filelist.close();
+
+    // 3. 构建 FFmpeg 命令
+    std::string command = "ffmpeg -f concat -safe 0 -i filelist.txt -c copy \"" + output_filename + "\"";
+
+    // 4. 执行命令
+    std::cout << "执行命令: " << command << std::endl;
+    int ret = std::system(command.c_str());
+    if (ret != 0) {
+        std::cerr << "FFmpeg 合并失败 (返回值: " << ret << ")" << std::endl;
+        std::remove("filelist.txt"); // 清理临时文件
+        return false;
+    }
+
+    // 5. 删除临时文件
+    std::remove("filelist.txt");
+    std::cout << "视频合并成功: " << output_filename << std::endl;
+    return true;
 }

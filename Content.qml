@@ -47,22 +47,42 @@ Item {
                             _timeline.playerSlider.source=dialogs.fileOpen.selectedFile
                         }
                     }
-                    saveDialog{
+                    saveClipDialog{
                         onAccepted: {
-                            //读取thumbnailData，进行剪切
                             let data=videoList.cutView.thumbnailData;
-                            let view=videoList.cutView;
+                            let view=videoList.cutView.cutListView;
 
-                            let outFileName=CutViewControl.removeFileExtension(String(_VP.dialogs.saveDialog.selectedFile))+"."+_VP.dialogs.saveDialog.defaultSuffix;//_VP.dialogs.saveDialog.saveDialog.
+                            let outName=CutViewControl.removeFileExtension(String(_VP.dialogs.saveClipDialog.selectedFile))+"."+_VP.dialogs.saveClipDialog.defaultSuffix;//_VP.dialogs.saveDialog.saveDialog.
                             let inFileName=String(data.get(view.currentIndex).videoUrl);
-                            console.log("outFileName: ",outFileName,"inFileName: ",inFileName);
+                            console.log("outFileName: ",outName,"inFileName: ",inFileName);
 
                             let stime=data.get(view.currentIndex).startTime/1000
                             let etime=Number(data.get(view.currentIndex).endTime)/1000
 
                             console.log("stime: ",stime,"etime: ",etime);
+                            let outFileName = String(outName.replace("file://", ""));
                             Worker.cutOneVideo(stime,etime,inFileName,outFileName);
-
+                        }
+                    }
+                    saveAllClipsDialog{
+                        onAccepted: {
+                            let data=videoList.cutView.thumbnailData;
+                            let view=videoList.cutView.cutListView;
+                            let outName=CutViewControl.removeFileExtension(String(_VP.dialogs.saveAllClipsDialog.selectedFile))+"."+_VP.dialogs.saveAllClipsDialog.defaultSuffix;//_VP.dialogs.saveDialog.saveDialog.
+                            console.log(outName);
+                            let inFileName=String(data.get(view.currentIndex).videoUrl);
+                            console.log("saveDialog.defaultSuffix: ",videoPlayer.dialogs.saveAllClipsDialog.defaultSuffix);
+                            let dcount = data.count;
+                            // let stimes = new Array();
+                            // let etimes = new Array();
+                            let stimes = [];
+                            let etimes = [];
+                            for(let i =0;i<data.count;i++){
+                            stimes.push(data.get(i).startTime/1000);
+                            etimes.push(data.get(i).endTime/1000);
+                            }
+                            let outFileName = String(outName.replace("file://", ""));
+                            Worker.saveAllVideos(stimes,etimes,inFileName,outFileName);
                         }
                     }
                 }

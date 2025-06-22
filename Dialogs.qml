@@ -4,9 +4,11 @@ import QtQuick.Dialogs
 Item {
     property alias fileOpen: _fileOpen
     property alias about:_about
-    property alias saveDialog:_saveDialog
+    property alias saveClipDialog:_saveClipDialog
     property alias cutErrorDialog:_cutError
     property alias deleteInMiddleDialog:_deleteInMiddle
+    property alias saveAllClipsDialog:_saveAllClipsDialog
+
 
     FileDialog{
         id:_fileOpen
@@ -24,7 +26,15 @@ Item {
     }
 
     FileDialog{
-        id:_saveDialog
+        id:_saveClipDialog
+        title:"save video"
+        currentFolder: "./"
+        fileMode:FileDialog.SaveFile
+        nameFilters: ["Vidoe File(*.mp4 *avi *mkv)"]
+    }
+
+    FileDialog{
+        id:_saveAllClipsDialog
         title:"save video"
         currentFolder: "./"
         fileMode:FileDialog.SaveFile

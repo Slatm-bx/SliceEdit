@@ -114,10 +114,10 @@ Rectangle{
                     Layout.alignment: Qt.AlignLeft
                     text: qsTr("导出")
                     onClicked: {
-                        //打开保存文件对话框
-                        let saveDialog=videoPlayer.dialogs.saveDialog;
-                        saveDialog.defaultSuffix=String(CutViewControl.getFileExtension(thumbnailData.get(cutListView.currentIndex).videoUrl));//得到当前modeElement的videoUrl
-                        console.log("saveDialog.defaultSuffix: ",saveDialog.defaultSuffix);
+                        //得到拓展名
+                        let saveDialog=videoPlayer.dialogs.saveAllClipsDialog;
+                        saveDialog.defaultSuffix=String(CutViewControl.getFileExtension(thumbnailData.get(cutListView.currentIndex).videoUrl));
+                        //打开对话框
                         saveDialog.open();
                     }//执行C++代码
                 }
@@ -156,7 +156,7 @@ Rectangle{
                                 for(let i=0;i<cutListView.count;i++){
                                     data=thumbnailData.get(i);
                                     //如果红色矩形存在
-                                    if(data.endTime!=-1)PreviewBarRowControl.deleteOneCutFunction(data.cutId);
+                                    if(data.endTime!==-1)PreviewBarRowControl.deleteOneCutFunction(data.cutId);
                                     else {
                                         timeline.playerSlider.tmpCut.visible=false;
                                         //恢复未切片状态
@@ -169,6 +169,15 @@ Rectangle{
                                 thumbnailData.clear();
                             }
                         }
+                        MenuItem{
+                            text:"保存当前切片"
+                            onTriggered:{
+                                let saveDialog=videoPlayer.dialogs.saveClipDialog;
+                                saveDialog.defaultSuffix=String(CutViewControl.getFileExtension(thumbnailData.get(cutListView.currentIndex).videoUrl));//得到当前modeElement的videoUrl
+                                console.log("saveDialog.defaultSuffix: ",saveDialog.defaultSuffix);
+                                saveDialog.open();
+                            }
+                        }
                         MenuItem {
                             text: "向上移"
                             visible: cutListView.currentIndex === 0 ? false :true
@@ -179,6 +188,7 @@ Rectangle{
                             text: "向下移"
                             onTriggered:CutViewControl.moveClipDown()
                         }
+
                     }
                 }
             }

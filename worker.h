@@ -16,5 +16,11 @@ public slots:
     Q_INVOKABLE void cutOneVideo(double startime,
                                  double endtime,
                                  QUrl inName,
-                                 QUrl outName); //QUrl inName, QUrl outName);
+                                 QString outfileName); //QUrl inName, QUrl outName);
+
+    Q_INVOKABLE void saveAllVideos(const QVariantList &startTimes,
+                                   const QVariantList &endTimes,
+                                   QUrl inName,
+                                   QString outName);
+    Q_INVOKABLE bool isSaveAllVideo(const std::string &output_filename, const std::vector<std::string> &input_files);
 };
