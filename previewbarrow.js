@@ -7,13 +7,7 @@ function startCutFunction() {
     _tmpCut.visible=true
 }
 
-// function abc(){
-
-// }
-
-
-
-//别动代码极易报错
+//预览条上的切片显示
 function endCutFunction(){
     let _tmpCut=timeline.playerSlider.tmpCut
     let playerSlider=timeline.playerSlider
@@ -21,6 +15,8 @@ function endCutFunction(){
     let startTime=_tmpCut.startTime,endTime=videoPlayer.player.position
     if(endTime<startTime)return
     _tmpCut.visible=false
+
+    //用字符串导入qml对象并绑定
     let str=`import QtQuick
 
     Rectangle {
@@ -41,17 +37,17 @@ function endCutFunction(){
 }
 
 // function clearCutFunction(){
-//     let cutList=timeline.playerSlider.cutList
-//     console.log("删除!")
-//     for(let i=0;i!=timeline.playerSlider.cutList.cutNum;i++){
-//         console.log("删除:"+i)
-//         cutList.cuts[i].destroy()
-//     }
+//     // let cutList=timeline.playerSlider.cutList
+//     // console.log("删除!")
+//     // for(let i=0;i!=timeline.playerSlider.cutList.cutNum;i++){
+//     //     console.log("删除:"+i)
+//     //     cutList.cuts[i].destroy()
+//     // }
 // }
 
 function deleteOneCutFunction(cutId){
     //如果是有结束时间的切片
     let cutList=timeline.playerSlider.cutList//用于存储红色矩形的对象
     console.log("删除:"+cutId)
-    if(cutId<cutList.cutNum && cutId>=0)cutList.cuts[cutId].destroy()
+    if(cutId<cutList.cutNum && cutId>=0 && cutList.cuts.hasOwnProperty(cutId))cutList.cuts[cutId].destroy()
 }
