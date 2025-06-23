@@ -15,7 +15,7 @@ Item {
         title: "Select video file"
 
         fileMode: FileDialog.OpenFile
-        nameFilters: ["Video files (*.mp4 *.avi)"]
+        nameFilters: ["Video files (*.mp4 *.avi *.mkv)"]
     }
     MessageDialog{
         id:_about

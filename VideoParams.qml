@@ -166,6 +166,15 @@ ColumnLayout{
                 Label { text: "帧率:"; color: "#aaa" }
                 Text { text:_VP.player.metaData.value(MediaMetaData.VideoFrameRate) !== undefined ? String(_VP.player.metaData.value(MediaMetaData.VideoFrameRate).toFixed(2)) : "未知" + " fps"; color: "white" }
 
+                Label { text: "当前播放:"; color: "#aaa" }
+                Text {
+                    text: {
+                        if (!_VP.player.duration) return "00:00";
+                        var sec = Math.floor(_VP.player.position / 1000);
+                        return Math.floor(sec / 60) + ":" + ("0" + (sec % 60)).slice(-2);
+                    }
+                    color: "white"
+                }
                 Label { text: "时长:"; color: "#aaa" }
                 Text {
                     text: {
@@ -176,9 +185,6 @@ ColumnLayout{
                     color: "white"
                 }
             }
-
-            // 底部留白
-            Item { Layout.fillHeight: true }
         }
         }
     }

@@ -86,20 +86,6 @@ Item {
                         }
                     }
                 }
-                progressSlider{
-                    value: Math.max(_VP.player.position,timeline.playerSlider.tmpCut.startTime)
-                    onMoved: {
-                        if(progressSlider.value<timeline.playerSlider.tmpCut.startTime){
-                            _VP.player.position=timeline.playerSlider.tmpCut.startTime;
-                            //progressSlider.value=timeline.playerSlider.tmpCut.startTime;
-                            //playerSlider.value=playerSlider.tmpCut.startTime;
-                            //_VP.player.position=playerSlider.tmpCut.startTime;
-                        }else{
-                            _VP.player.position=progressSlider.value;
-                        }
-
-                    }
-                }
             }
 
             VideoParams{
@@ -110,6 +96,9 @@ Item {
 
         PreviewBarControlRow{
             id:_lrow
+            height:50
+            //width不能写root.width,不然会导致spacing不是固定值
+            width:parent.width
             //两个button的onClicked:在不同文件中拓充了函数，但二者函数涉及的数据没有重叠，执行顺序不会影响结果
             stratCutButton{
                 onClicked:PreviewBarRowControl.startCutFunction()
@@ -121,7 +110,7 @@ Item {
 
         PreviewBarRow{
             id: _timeline
-            height: (1*root.height)/3 - _lrow.implicitHeight
+            height: (1*root.height)/3 - _lrow.height + parent.spacing
             width:root.width
             playerSlider{
                 videoshot{
@@ -133,22 +122,6 @@ Item {
                 to:_VP.player.duration
                 //value:_VP.player.position
                 value: Math.max(_VP.player.position,playerSlider.tmpCut.startTime)//? _VP.player.position:playerSlider.tmpCut.startTime
-                //property real vl:playerSlider.value
-                // value:{
-                //     if(_VP.player.position<playerSlider.tmpCut.startTime){
-                //         return playerSlider.tmpCut.startTime
-                //     }else{
-                //         return _VP.player.position
-                //     }
-                // }
-
-                // onValueChanged: {
-                //     if(playerSlider.value<playerSlider.tmpCut.startTime){
-                //         playerSlider.value=playerSlider.tmpCut.startTime
-                //     }else{
-                //         playerSlider.value=_VP.player.position
-                //     }
-                // }
                 onMoved: {
                     if(playerSlider.value<playerSlider.tmpCut.startTime){
                         _VP.player.position=playerSlider.tmpCut.startTime;

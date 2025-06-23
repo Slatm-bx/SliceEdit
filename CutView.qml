@@ -76,18 +76,77 @@ Rectangle{
             }
             TapHandler{
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onTapped: (event,button)=>{
+                onTapped: (eventPoint,button)=>{
                     cutListView.currentIndex = index;
                     //更新播放位置
                     videoPlayer.player.position=model.startTime;
-                    if(button===Qt.RightButton) {
-                        contextMenu.popup(100,200,chapter);//position//pressPosition//globalPosition
-                                  //contextMenu.popup(pressX,pressY);
-                    }
+                }
+            }
+            ContextMenu.menu: cMenu
+        }
+    }
+    Menu {
+        id: cMenu
+        width:toolBar.width
+        MenuItem {
+            text: "删除选中项"
+            onTriggered:{
+                let data=thumbnailData.get(cutListView.currentIndex);
+                if(data.endTime===-1){//当删除缺少时间的切片时
+                    //关闭蓝色矩形
+                    timeline.playerSlider.tmpCut.visible=false;
+                    //恢复未切片状态
+                    lrow.stratCutButton.enabled=true;
+                    lrow.endCutButton.enabled=false;
+                    thumbnailData.remove(cutListView.currentIndex);
+                    timeline.playerSlider.tmpCut.startTime=0;
+                }else{
+                    PreviewBarRowControl.deleteOneCutFunction(data.cutId)
+                    thumbnailData.remove(cutListView.currentIndex);
                 }
             }
         }
+        MenuItem { text: "删除所有项"
+            onTriggered:{
+                let data;
+                for(let i=0;i<cutListView.count;i++){
+                    data=thumbnailData.get(i);
+                    //如果红色矩形存在
+                    if(data.endTime!==-1)PreviewBarRowControl.deleteOneCutFunction(data.cutId);
+                    else {
+                        timeline.playerSlider.tmpCut.visible=false;
+                        //恢复未切片状态
+                        lrow.stratCutButton.enabled=true;
+                        lrow.endCutButton.enabled=false;
+                        //更新
+                        timeline.playerSlider.tmpCut.startTime=0;
+                    }
+                }
+                thumbnailData.clear();
+            }
+        }
+        MenuItem{
+            text:"保存当前切片"
+            onTriggered:{
+                let saveDialog=videoPlayer.dialogs.saveClipDialog;
+                saveDialog.defaultSuffix=String(CutViewControl.getFileExtension(thumbnailData.get(cutListView.currentIndex).videoUrl));//得到当前modeElement的videoUrl
+                console.log("saveDialog.defaultSuffix: ",saveDialog.defaultSuffix);
+                saveDialog.open();
+            }
+        }
+        MenuItem {
+            text: "向上移"
+            visible: cutListView.currentIndex === 0 ? false :true
+            onTriggered:CutViewControl.moveClipUp()
+        }
+        MenuItem {
+            visible:cutListView.currentIndex === cutListView.count -1 ?false :true
+            text: "向下移"
+            onTriggered:CutViewControl.moveClipDown()
+        }
+
     }
+
     ColumnLayout{
         id:mainLayout
         anchors.fill:parent

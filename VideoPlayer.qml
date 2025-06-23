@@ -10,7 +10,6 @@ ColumnLayout{
     property alias player :_player
     property alias dialogs : _dialogs
     property alias videoOutput:_videoOutput
-    property alias progressSlider: progressSlider
 
     spacing:0
     Layout.fillWidth: true
@@ -51,7 +50,8 @@ ColumnLayout{
     Rectangle {
         id:_playrc
         width:parent.width
-        height:parent.height - _vrow.implicitHeight - _vtext.height
+        // height:parent.height - _vrow.implicitHeight - _vtext.height
+        height:parent.height - _vtext.height
         Layout.topMargin: 0
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -82,102 +82,6 @@ ColumnLayout{
             anchors.centerIn: parent
             text: "视频预览区域"
             color: "white"
-        }
-    }
-
-    RowLayout{
-        id:_vrow
-            Label{
-                text: CutViewControl.formatTime(_player.position) + " / " + CutViewControl.formatTime(_player.duration)
-                color:"white"
-            }
-
-            // 中间：进度条滑块
-        Slider {
-            id: progressSlider
-            Layout.fillWidth: true
-            // Layout.alignment: Qt.AlignVCenter
-            to:_player.duration
-            value: _player.position
-
-            // onMoved: {//仅在拖动时触发
-            //     _player.position=value
-            // }
-        }
-        RowLayout {
-                    spacing: 5
-
-                    Button {
-                        text: "▶️"  // 开始按钮
-                        Layout.preferredWidth: 30
-                        Layout.preferredHeight: 30
-                        Layout.minimumWidth: 30
-                        Layout.minimumHeight: 30
-
-                        background: Rectangle {
-                            radius: width / 2
-                            color: "#333"
-                        }
-
-                        contentItem: Text {
-                            text: parent.text
-                            color: "white"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        onClicked: _player.play()
-                    }
-
-                    Button {
-                        text: "⏸"  // 暂停按钮
-                        Layout.preferredWidth: 30
-                        Layout.preferredHeight: 30
-                        Layout.minimumWidth: 30
-                        Layout.minimumHeight: 30
-
-                        background: Rectangle {
-                            radius: width / 2
-                            color: "#333"  // 黄色背景
-                        }
-
-                        contentItem: Text {
-                            text: parent.text
-                            color: "white"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        onClicked: {
-                            if(_player.playing)
-                            _player.pause()
-                            else _player.play()
-                        }
-                    }
-
-                    Button {
-                        text: "⤢"  // 全屏按钮
-                        Layout.preferredWidth: 30
-                        Layout.preferredHeight: 30
-                        Layout.minimumWidth: 30
-                        Layout.minimumHeight: 30
-                        onClicked: {
-                                    // 全屏切换功能
-                                    if (root.visibility === Window.FullScreen)
-                                       root.visibility = Window.Windowed
-                                    else
-                                        showFullScreen()
-                                }
-                        background: Rectangle {
-                            radius: width / 2
-                            color: "#333"  // 蓝色背景
-                        }
-
-                        contentItem: Text {
-                            text: parent.text
-                            color: "white"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                    }
         }
     }
 
