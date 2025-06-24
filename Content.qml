@@ -117,7 +117,7 @@ Item {
                 onClicked:PreviewBarRowControl.startCutFunction()
             }
             endCutButton{
-                onClicked: PreviewBarRowControl.endCutFunction()
+                onClicked:PreviewBarRowControl.endCutFunction()
             }
         }
 
@@ -130,23 +130,41 @@ Item {
                 delegate: PlayerSlider{// 改到content内
                     source: model.source
                     onMoved: {
-                        if(_VP.player.source===source)_VP.player.position=timeline.playerSlider.value;
+
+                        if(_VP.player.source===source){
+                            _VP.player.position=timeline.playerSlider.value;
+                        }
                         else{
-                            _VP.player.play()
-                            timeline.playerSlider.value=timeline.playerSlider.value
-                            timeline.playerSlider.to=timeline.playerSlider.to
-                            timeline.playerSliderView.currentIndex=index
+                            if(lrow.stratCutButton.enabled){
+                                //切换轨道
+                                //解除旧绑定
+                                timeline.playerSlider.value=timeline.playerSlider.value
+                                timeline.playerSlider.to=timeline.playerSlider.to
+
+                                timeline.playerSliderView.currentIndex=index
+
+                                console.log("切换到轨道:",index)
+                                //_VP.player.source=source
+                                //_VP.player.position=timeline.playerSlider.value
+                                // timeline.playerSlider.value=Qt.binding(function(){return _VP.player.position})
+                                // timeline.playerSlider.to=Qt.binding(function(){return _VP.player.duration})
+                                // _VP.player.play()
+                            }
                         }
                     }
                 }
-                onCurrentIndexChanged: {
+                onCurrentIndexChanged: {//修改轨道位置 content PreviewBarRow
                     if(timeline.playerSliderView.count>=1){
-                        _VP.player.play()
+                        console.log("修改绑定")
+
+                        _VP.player.source=timeline.playerSlider.source
                         _VP.player.position=timeline.playerSlider.value
+                        //_VP.player.source=Qt.binding(function(){return timeline.playerSlider.source})
+
+                        console.log(timeline.playerSlider.source);
                         timeline.playerSlider.value=Qt.binding(function(){return _VP.player.position})
                         timeline.playerSlider.to=Qt.binding(function(){return _VP.player.duration})
-                        _VP.player.source=Qt.binding(function(){return timeline.playerSlider.source})
-                        console.log(timeline.playerSlider.source);
+                        _VP.player.play()
                     }
                 }
             }

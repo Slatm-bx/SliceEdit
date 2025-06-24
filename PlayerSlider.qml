@@ -13,7 +13,7 @@ Slider {
     width: Math.floor(parent.width/200)*200
 
     height:150
-    value: 0.5
+    value: 0
     background: Rectangle {
         id:overallProgress
         z:-3
@@ -22,7 +22,7 @@ Slider {
         radius: 2
         color: "white"
         opacity : 1
-        border.color: "black"
+        border.color: timeline.playerSliderView.currentIndex===index?"#3f3":"black"
         border.width: 4
         Text {
             anchors.centerIn: parent
