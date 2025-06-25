@@ -63,8 +63,11 @@ function loadEndTime(){
     }
 
     if(model.get(index).startTime>videoPlayer.player.position) {
+        model.remove(index)
         let cutErrorDialog=videoPlayer.dialogs.cutErrorDialog;
         cutErrorDialog.open();
+        _stratCutButton.enabled=true;
+        _endCutButton.enabled=false;
         return;
     }
     model.set(index,{"endTime":videoPlayer.player.position});
