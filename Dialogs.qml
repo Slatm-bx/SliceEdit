@@ -21,7 +21,7 @@ Item {
         id:_about
         title: "About"
         buttons: MessageDialog.Ok
-        text:"Video Player"
+        text:"Slice Edit"
         informativeText: "This is a video edit.Powered by Qt"
     }
 

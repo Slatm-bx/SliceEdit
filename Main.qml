@@ -7,7 +7,7 @@ ApplicationWindow {
     id: root
     visible: true
     //动态更新标题并用正则表达式去除路径名，直接显示打开的文件名
-    title: "视频剪辑软件-" + String(content.videoPlayer.player.source).replace(/^.*[\\\/]/, '');
+    title: "SliceEdit-" + String(content.videoPlayer.player.source).replace(/^.*[\\\/]/, '');
     minimumWidth: 1200  // 直接约束窗口最小尺寸
     minimumHeight: 600
     color:"#222"

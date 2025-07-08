@@ -1,3 +1,5 @@
+//视频按时间截图
+
 #pragma once
 
 #include <QObject>
@@ -6,7 +8,7 @@
 #include <QUrl>
 #include <thread>
 #include <vector>
-#include <mutex>
+//#include <mutex>
 
 class VideoShot : public QObject
 {
@@ -21,11 +23,12 @@ public:
     Q_INVOKABLE QString tmpPath();
 
 signals:
-    void shotFinished();
+    void shotFinished(int time);
+    //void timeRead(int ms);
 
 private:
     void shot(QUrl source, int num, QString outputPath);
     std::vector<std::thread> m_threads; //线程池
-    std::mutex m_lock;
+    //std::mutex m_lock;  不需要互斥锁
     QString m_outputPath;
 };
