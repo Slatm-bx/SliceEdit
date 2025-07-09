@@ -8,6 +8,7 @@ Item {
     property alias cutErrorDialog:_cutError
     property alias deleteInMiddleDialog:_deleteInMiddle
     property alias saveAllClipsDialog:_saveAllClipsDialog
+    property alias sameFileDialog:_sameFileDialog
 
 
     FileDialog{
@@ -45,7 +46,7 @@ Item {
         id:_cutError
         title: "CutError"
         buttons: MessageDialog.Ok
-        text:"Video Player"
+        text:"Slice Edit"
         informativeText: "The selected time is incorrect."
     }
 
@@ -53,8 +54,16 @@ Item {
         id:_deleteInMiddle
         title: "delete In Middle"
         buttons: MessageDialog.Ok
-        text:"Video Player"
+        text:"Slice Edit"
         informativeText: "The chapter is deleted."
+    }
+
+    MessageDialog{
+        id:_sameFileDialog
+        title: "Error"
+        buttons: MessageDialog.Ok
+        text:"Slice Edit"
+        informativeText: "The video has been opened."
     }
 }
 

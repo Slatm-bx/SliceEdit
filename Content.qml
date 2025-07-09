@@ -45,7 +45,13 @@ Item {
                         onAccepted: {
                             // _VP.player.stop()
                             // _timeline.playerSlider.source=dialogs.fileOpen.selectedFile
-                            timeline.playerSliderModel.append({"source":dialogs.fileOpen.selectedFile});
+                            let path=dialogs.fileOpen.selectedFile
+                            if(PreviewBarRowControl.sameFile(path)){
+                                _VP.dialogs.sameFileDialog.open()
+                                return
+                            }
+
+                            timeline.playerSliderModel.append({"source":path});
                         }
                     }
                     saveClipDialog{

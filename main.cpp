@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QIcon>
+#include <QWindow>
 #include "worker.h"
 int main(
     int argc, char *argv[])
@@ -19,8 +20,6 @@ int main(
     engine.rootContext()->setContextProperty("Worker", &w);
     engine.loadFromModule("Videoedit", "Main");
     app.setWindowIcon(QIcon(":/icon/icons/SliceEdit.png"));
-    if (QIcon(":/icon/icons/SliceEdit.png").isNull())
-        qDebug() << "为空";
 
     return app.exec();
 }
