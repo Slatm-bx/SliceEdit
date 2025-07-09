@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>icons/SliceEdit.png</file>
+    </qresource>
+</RCC>

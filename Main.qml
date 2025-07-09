@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtMultimedia
+import QtQuick.Window
 
 ApplicationWindow {
     id: root
@@ -19,5 +20,4 @@ ApplicationWindow {
         id:content
         anchors.fill: parent
     }
-
 }

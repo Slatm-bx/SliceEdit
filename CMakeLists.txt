@@ -54,7 +54,9 @@ qt_add_qml_module(
   QML_FILES
   cutViewControl.js
   QML_FILES
-  previewbarrow.js)
+  previewbarrow.js
+  RESOURCES
+  icons.qrc)
 
 source_group("PreviewBar" FILES videoshot.h videoshot.cpp PlayerSlider.qml
                                 previewbarrow.js PreviewBarRow.qml)
@@ -66,7 +68,7 @@ target_link_libraries(SliceEdit PRIVATE Qt6::Quick Qt6::Multimedia avutil
 
 set_target_properties(
   SliceEdit
-  PROPERTIES # AUTORCC TRUE
+  PROPERTIES AUTORCC TRUE
              # MACOSX_BUNDLE_GUI_IDENTIFIER
              # com.example.SliceEdit
              MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
