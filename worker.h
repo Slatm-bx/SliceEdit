@@ -20,7 +20,9 @@ public slots:
 
     Q_INVOKABLE void saveAllVideos(const QVariantList &startTimes,
                                    const QVariantList &endTimes,
-                                   QUrl inName,
+                                   const QList<QUrl> &inNames,
                                    QString outName);
     Q_INVOKABLE bool isSaveAllVideo(const std::string &output_filename, const std::vector<std::string> &input_files);
+
+    void VideoAviToMp4(const std::string &outputPath, const std::string &inputPath);
 };

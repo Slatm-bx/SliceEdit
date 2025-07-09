@@ -26,7 +26,8 @@ Item {
             ColumnLayout{
                 spacing: 0
                 width:(root.width)/5
-                height:(2*root.height)/3
+                // height:(3*root.height)/5
+                Layout.preferredHeight:(3*root.height)/5
                 Menus{
                     id:_menusrow
                     openMenu.onTriggered: _VP.dialogs.fileOpen.open()
@@ -36,7 +37,8 @@ Item {
                 VideoList{
                     id:_VL
                     listrec.width: parent.width
-                    listrec.height:parent.height - _menusrow.implicitHeight - textrec.height
+                    // listrec.height:parent.height - _menusrow.implicitHeight - textrec.height
+                    listrec.height:parent.height
                 }
             }
 
@@ -47,7 +49,13 @@ Item {
                         onAccepted: {
                             // _VP.player.stop()
                             // _timeline.playerSlider.source=dialogs.fileOpen.selectedFile
-                            timeline.playerSliderModel.append({"source":dialogs.fileOpen.selectedFile});
+                            let path=dialogs.fileOpen.selectedFile
+                            if(PreviewBarRowControl.sameFile(path)){
+                                _VP.dialogs.sameFileDialog.open()
+                                return
+                            }
+
+                            timeline.playerSliderModel.append({"source":path});
                         }
                     }
                     saveClipDialog{
@@ -76,30 +84,31 @@ Item {
                             let inFileName=String(data.get(view.currentIndex).videoUrl);
                             console.log("saveDialog.defaultSuffix: ",videoPlayer.dialogs.saveAllClipsDialog.defaultSuffix);
                             let dcount = data.count;
-                            // let stimes = new Array();
-                            // let etimes = new Array();
                             let stimes = [];
                             let etimes = [];
+                            let inFileNames = [];
                             for(let i =0;i<data.count;i++){
                                 stimes.push(data.get(i).startTime/1000);
                                 etimes.push(data.get(i).endTime/1000);
+
+                                inFileNames.push(data.get(i).videoUrl);
                             }
                             let outFileName = String(outName.replace("file://", ""));
-                            Worker.saveAllVideos(stimes,etimes,inFileName,outFileName);
+                            Worker.saveAllVideos(stimes,etimes,inFileNames,outFileName);
                         }
                     }
                 }
             }
 
             VideoParams{
-
             }
 
         }
-
         PreviewBarControlRow{
             id:_lrow
-            height:50
+            Layout.preferredHeight:70
+            // height: 70
+            // height:(1*parent.height)/5
             //width不能写root.width,不然会导致spacing不是固定值
             width:parent.width
             //两个button的onClicked:在不同文件中拓充了函数，但二者函数涉及的数据没有重叠，执行顺序不会影响结果
@@ -113,8 +122,9 @@ Item {
 
         PreviewBarRow{
             id: _timeline
-            height: (1*root.height)/3 - _lrow.height + parent.spacing
-            width:root.width
+
+            Layout.preferredHeight:(2*root.height)/5 - parent.spacing - _lrow.height
+            width:parent.width
 
             playerSliderView{
                 delegate: PlayerSlider{// 改到content内
@@ -162,6 +172,7 @@ Item {
                         console.log(timeline.playerSlider.source);
                         timeline.playerSlider.value=Qt.binding(function(){return _VP.player.position})
                         timeline.playerSlider.to=Qt.binding(function(){return _VP.player.duration})
+
                         _VP.player.play()
                     }
                 }

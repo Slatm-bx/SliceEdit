@@ -11,10 +11,10 @@ find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia)
 
 qt_standard_project_setup(REQUIRES 6.9)
 
-qt_add_executable(appVideoedit)
+qt_add_executable(SliceEdit)
 
 qt_add_qml_module(
-  appVideoedit
+  SliceEdit
   URI
   Videoedit
   VERSION
@@ -25,6 +25,8 @@ qt_add_qml_module(
   videoshot.cpp
   worker.h
   worker.cpp
+  sourcemanager.h
+  sourcemanager.cpp
   QML_FILES
   Main.qml
   QML_FILES
@@ -55,16 +57,22 @@ qt_add_qml_module(
   cutViewControl.js
   QML_FILES
   previewbarrow.js
-  SOURCES sourcemanager.h sourcemanager.cpp)
+  RESOURCES
+  icons.qrc)
 
-target_compile_features(appVideoedit PRIVATE cxx_std_23)
+source_group("PreviewBar" FILES videoshot.h videoshot.cpp PlayerSlider.qml
+                                previewbarrow.js PreviewBarRow.qml)
 
-target_link_libraries(appVideoedit PRIVATE Qt6::Quick Qt6::Multimedia avutil
-                                           avformat avcodec swscale)
+target_compile_features(SliceEdit PRIVATE cxx_std_23)
+
+target_link_libraries(SliceEdit PRIVATE Qt6::Quick Qt6::Multimedia avutil
+                                        avformat avcodec swscale)
 
 set_target_properties(
-  appVideoedit
-  PROPERTIES # MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appVideoedit
+  SliceEdit
+  PROPERTIES AUTORCC TRUE
+             # MACOSX_BUNDLE_GUI_IDENTIFIER
+             # com.example.SliceEdit
              MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
              MACOSX_BUNDLE_SHORT_VERSION_STRING
              ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -73,7 +81,7 @@ set_target_properties(
 
 include(GNUInstallDirs)
 install(
-  TARGETS appVideoedit
+  TARGETS SliceEdit
   BUNDLE DESTINATION .
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -101,21 +109,21 @@ install(
 # @if true @if true qt_standard_project_setup(REQUIRES 6.9) @else
 # qt_standard_project_setup() @endif @endif
 #
-# qt_add_executable(appVideoedit main.cpp )
+# qt_add_executable(SliceEdit main.cpp )
 #
-# qt_add_qml_module(appVideoedit URI Videoedit VERSION 1.0 QML_FILES Main.qml )
+# qt_add_qml_module(SliceEdit URI Videoedit VERSION 1.0 QML_FILES Main.qml )
 #
 # # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1. #
 # If you are developing for iOS or macOS you should consider setting an #
 # explicit, fixed bundle identifier manually though.
-# set_target_properties(appVideoedit PROPERTIES # MACOSX_BUNDLE_GUI_IDENTIFIER
-# com.example.appVideoedit MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+# set_target_properties(SliceEdit PROPERTIES # MACOSX_BUNDLE_GUI_IDENTIFIER
+# com.example.SliceEdit MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
 # MACOSX_BUNDLE_SHORT_VERSION_STRING
 # ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} MACOSX_BUNDLE TRUE
 # WIN32_EXECUTABLE TRUE )
 #
-# target_link_libraries(appVideoedit PRIVATE Qt6::Quick )
+# target_link_libraries(SliceEdit PRIVATE Qt6::Quick )
 #
-# include(GNUInstallDirs) install(TARGETS appVideoedit BUNDLE DESTINATION .
-# LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION
+# include(GNUInstallDirs) install(TARGETS SliceEdit BUNDLE DESTINATION . LIBRARY
+# DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION
 # ${CMAKE_INSTALL_BINDIR} )

@@ -4,7 +4,7 @@
 
 SourceManager::SourceManager()
 {
-    m_outputPath = QDir::tempPath() + "/VideoShot/";
+    m_outputPath = QDir::tempPath() + "/SliceEdit/";
     QDir dir;
     if (!dir.exists(m_outputPath)) dir.mkdir(m_outputPath);
 }

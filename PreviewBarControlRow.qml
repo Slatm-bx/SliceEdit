@@ -16,7 +16,7 @@ RowLayout {
     spacing:30
     id:_lrow
 
-    RowLayout{
+    ColumnLayout{
         Button {
             id:_openButton
             text: "📂"
@@ -45,14 +45,14 @@ RowLayout {
         Text {
                 width: 25  // 限制宽度确保换行
                 color:"white"
-                text: "打开\n视频"  // 显式换行
+                text: "打开视频"  // 显式换行
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                font.pixelSize: 18
+                font.pixelSize: 16
         }
     }
 
-    RowLayout{
+    ColumnLayout{
         Button {
             id:_stratCutButton
             text: "✂️"
@@ -82,14 +82,14 @@ RowLayout {
         Text {
                 width: 25  // 限制宽度确保换行
                 color:"white"
-                text: "开始\n剪辑"  // 显式换行
+                text: "开始剪辑"  // 显式换行
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                font.pixelSize: 18
+                font.pixelSize: 16
         }
     }
 
-    RowLayout{
+    ColumnLayout{
         Button {
             id:_endCutButton
             text: "🏁"
@@ -120,14 +120,14 @@ RowLayout {
         Text {
                 width: 25  // 限制宽度确保换行
                 color:"white"
-                text: "结束\n剪辑"  // 显式换行
+                text: "结束剪辑"  // 显式换行
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                font.pixelSize: 18
+                font.pixelSize: 16
         }
     }
 
-    RowLayout{
+    ColumnLayout{
         Button {
             text: "▶️"  // 开始按钮
             Layout.preferredWidth: 50
@@ -151,15 +151,15 @@ RowLayout {
         Text {
                 width: 25  // 限制宽度确保换行
                 color:"white"
-                text: "播放\n视频"  // 显式换行
+                text: "播放视频"  // 显式换行
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.Wrap
-                font.pixelSize: 18
+                font.pixelSize: 16
         }
     }
 
-    RowLayout{
+    ColumnLayout{
         Button {
             text: "⏸️"  // 暂停按钮
             Layout.preferredWidth: 50
@@ -187,14 +187,14 @@ RowLayout {
         Text {
                 width: 25  // 限制宽度确保换行
                 color:"white"
-                text: "暂停\n视频"  // 显式换行
+                text: "暂停视频"  // 显式换行
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                font.pixelSize: 18
+                font.pixelSize: 16
         }
     }
 
-    RowLayout{
+    ColumnLayout{
         Button {
             text: "🔍"  // 全屏按钮
             font.pixelSize: 30
@@ -218,14 +218,14 @@ RowLayout {
         Text {
                 width: 25  // 限制宽度确保换行
                 color:"white"
-                text: "全屏\n播放"  // 显式换行
+                text: "全屏播放"  // 显式换行
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                font.pixelSize: 18
+                font.pixelSize: 16
         }
     }
 
-    RowLayout{
+    ColumnLayout{
         Button {
             id:_saveButton
             text: "📥"
@@ -253,10 +253,10 @@ RowLayout {
         Text {
                 width: 25  // 限制宽度确保换行
                 color:"white"
-                text: "导出\n视频"  // 显式换行
+                text: "导出视频"  // 显式换行
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                font.pixelSize: 18
+                font.pixelSize: 16
         }
     }
 }

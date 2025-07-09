@@ -92,3 +92,12 @@ function deleteOneSlider(sliderView,sdata){
     }
     sdata.remove(sliderView.currentIndex);
 }
+
+function sameFile(path){
+    for(let i=0;i!==timeline.playerSliderModel.count;i++){
+        let item=timeline.playerSliderModel.get(i)
+        if(item.source===path)return true
+    }
+    return false
+
+}
