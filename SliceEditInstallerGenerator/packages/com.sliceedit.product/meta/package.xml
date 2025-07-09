@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>SliceEdit</DisplayName>
+    <Description>SliceEdit软件本体(需要ffmpeg)</Description>
+    <Version>1.0</Version>
+    <ReleaseDate>2025-07-08</ReleaseDate>
+    <Default>true</Default>
+    <ForcedInstallation>true</ForcedInstallation>
+    <Script>installscript.qs</Script>
+    <!--<Licenses>
+        <License name="Public License Agreement" file="license.txt" />
+        </Licenses>-->
+    </Package>

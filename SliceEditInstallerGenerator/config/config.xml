@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Slice Edit</Name>
+    <Version>1.0</Version>
+    <Title>Slice Edit Installer</Title>
+    <Publisher>This is vendor</Publisher>
+    <Logo>SliceEdit.png</Logo>
+    <TargetDir>/opt/SliceEdit</TargetDir>
+</Installer>

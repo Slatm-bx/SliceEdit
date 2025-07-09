@@ -1,0 +1,110 @@
+function getFileExtension(url) {
+    // 正则表达式匹配最后一个点后的非空字符（排除查询参数）//正则表达式末尾的 i 标志使匹配不区分大小写
+    const match = /\.([a-z0-9]+)(?:[?#]|$)/i.exec(url);
+    // 如果匹配成功则返回小写扩展名，否则返回空字符串
+    return match ? match[1].toLowerCase() : "";
+}
+function removeFileExtension(filePath) {
+        // 找到最后一个斜杠的位置（分割路径与文件名）
+        const lastSlashIndex = filePath.lastIndexOf('/');
+        // 找到最后一个点的位置（分割文件名与后缀）
+        const lastDotIndex = filePath.lastIndexOf('.');
+        // 如果存在点且在最后一个斜杠之后（确保不是路径中的点）
+        if (lastDotIndex > lastSlashIndex) {
+            // 截取从开始到点的位置的字符串（不含后缀）
+            return filePath.substring(0, lastDotIndex);
+        }
+        // 没有后缀时返回原路径
+        return filePath;
+}
+
+function loadStartTime(){
+    console.log("开始时间"+videoPlayer.player.position);
+    console.log("path:",timeline.playerSlider.outputPath);
+    //let _stratCutButton=
+    //缩略图路径
+    videoPlayer.videoOutput.grabToImage(function(result) {
+        let path=timeline.playerSlider.outputPath+_stratCutButton.count+".jpg";//
+
+        result.saveToFile(path);
+        videoList.cutView.thumbnailData.append({"videoUrl":videoPlayer.player.source,
+                                                "thumUrl":"file://"+path,"startTime":videoPlayer.player.position,"endTime":-1,"cutId":_stratCutButton.count});
+        _stratCutButton.count++;
+        _stratCutButton.enabled=false;
+        _endCutButton.enabled=true;
+        startCutFunction();
+        //需要禁用拖放功能
+    })
+}
+
+function findElementIndex(model){
+    for(let i=0;i<model.count;i++){
+        if(model.get(i).cutId===_stratCutButton.count-1){
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+function loadEndTime(){
+    //更新当前视图项
+    let model=videoList.cutView.thumbnailData
+
+    //找到对应element
+    let index=findElementIndex(model);
+    if(index===-1) {
+        //该项不存在 打开对话框
+        videoPlayer.dialogs.deleteInMiddleDialog.open();
+        //设置按钮属性
+        _stratCutButton.enabled=true;
+        _endCutButton.enabled=false;
+        return;
+    }
+
+    if(model.get(index).startTime>videoPlayer.player.position) {
+        model.remove(index)
+        let cutErrorDialog=videoPlayer.dialogs.cutErrorDialog;
+        cutErrorDialog.open();
+        _stratCutButton.enabled=true;
+        _endCutButton.enabled=false;
+        return;
+    }
+    model.set(index,{"endTime":videoPlayer.player.position});
+
+    //model.get(model.count-1).endTime=videoPlayer.player.position;
+    //将stratCut设置为true
+    _stratCutButton.enabled=true;
+    _endCutButton.enabled=false;
+}
+
+function formatTime(ms) {
+       if (!ms) return "00:00";
+       var seconds = Math.floor(ms / 1000);
+       var minutes = Math.floor(seconds / 60);
+       seconds = seconds % 60;
+       return (minutes < 10 ? "0" + minutes : minutes) + ":" +
+              (seconds < 10 ? "0" + seconds : seconds);
+}
+
+function moveClipUp(){
+    let videoModel = content.videoList.cutView.thumbnailData;
+    let cI = content.videoList.cutView.cutListView.currentIndex;
+    if (cI >= 0) {
+            // 交换当前元素和前一个元素
+            videoModel.move(cI, cI - 1, 1);
+            // 更新 currentIndex 以保持选中状态
+            content.videoList.cutView.cutListView.currentIndex = cI - 1;
+        }
+}
+
+function moveClipDown(){
+    let videoModel = content.videoList.cutView.thumbnailData;
+    let cI = content.videoList.cutView.cutListView.currentIndex;
+    if (cI >= 0) {
+            // 交换当前元素和前一个元素
+            videoModel.move(cI +1, cI, 1);
+            // 更新 currentIndex 以保持选中状态
+            content.videoList.cutView.cutListView.currentIndex = cI + 1;
+        }
+}
