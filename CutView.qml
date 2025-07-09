@@ -77,15 +77,15 @@ Rectangle{
             TapHandler{
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onTapped: (eventPoint,button)=>{
-                              cutListView.currentIndex = index;
-                              //更新播放位置
+                      cutListView.currentIndex = index;
+                      //更新播放位置
 
-                              if(videoPlayer.player.source!==model.videoUrl){
-                                  videoPlayer.player.source=model.videoUrl
-                                  PreviewBarRowControl.changePreviewBarListIndex(model.videoUrl,model.startTime)
-                              }
-                              else videoPlayer.player.position=model.startTime;
-                          }
+                      if(videoPlayer.player.source!==model.videoUrl){
+                          videoPlayer.player.source=model.videoUrl
+                          PreviewBarRowControl.changePreviewBarListIndex(model.videoUrl,model.startTime)
+                      }
+                      else videoPlayer.player.position=model.startTime;
+                }
 
             }
             ContextMenu.menu: cMenu

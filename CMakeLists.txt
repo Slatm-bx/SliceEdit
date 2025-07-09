@@ -54,7 +54,8 @@ qt_add_qml_module(
   QML_FILES
   cutViewControl.js
   QML_FILES
-  previewbarrow.js)
+  previewbarrow.js
+  SOURCES sourcemanager.h sourcemanager.cpp)
 
 target_compile_features(appVideoedit PRIVATE cxx_std_23)
 

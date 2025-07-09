@@ -10,7 +10,7 @@ Slider {
     property string outputName
 
     id: playerSlider
-    width: Math.floor(parent.width/200)*200
+    width: Math.floor(content.timeline.playerSliderView.width/200)*200
 
     height:150
     value: 0

@@ -11,6 +11,8 @@ Item {
     property alias timeline: _timeline
     property alias lrow:_lrow
 
+    property bool isCutList: false
+
     // 主布局
     id:content
     ColumnLayout {
@@ -87,7 +89,6 @@ Item {
                         }
                     }
                 }
-
             }
 
             VideoParams{
@@ -117,6 +118,7 @@ Item {
 
             playerSliderView{
                 delegate: PlayerSlider{// 改到content内
+                    ContextMenu.menu:content.timeline.pMenu
                     source: model.source
                     onMoved: {
 
@@ -130,6 +132,7 @@ Item {
                                 timeline.playerSlider.value=timeline.playerSlider.value
                                 timeline.playerSlider.to=timeline.playerSlider.to
 
+                                //切换预览条
                                 timeline.playerSliderView.currentIndex=index
 
                                 console.log("切换到轨道:",index)
@@ -147,7 +150,13 @@ Item {
                         console.log("修改绑定")
 
                         _VP.player.source=timeline.playerSlider.source
-                        _VP.player.position=timeline.playerSlider.value
+                        if(isCutList){
+                            console.log("isCutList: ",isCutList)
+                            content.isCutList=false;
+                        }else{
+                            _VP.player.position=timeline.playerSlider.value
+                        }
+
                         //_VP.player.source=Qt.binding(function(){return timeline.playerSlider.source})
 
                         console.log(timeline.playerSlider.source);

@@ -41,7 +41,7 @@ function endCutFunction(){
 function deleteOneCutFunction(path,cutId){
     //如果是有结束时间的切片
     for(let i=0;i!==timeline.playerSliderView.count;i++){
-        let item=timeline.playerSliderView.itemAtIndex(i)
+        let item=timeline.playerSliderView.itemAtIndex(i)//返回当前的预览条
         if(item.source===path){
             let cutList=item.cutList//用于存储红色矩形的对象
             console.log("删除:"+path+" "+cutId)
@@ -62,7 +62,9 @@ function changePreviewBarListIndex(path,position){//采用遍历防止动态修�
             timeline.playerSlider.to=timeline.playerSlider.to
 
             _VP.player.position=position
+            content.isCutList=true;
             timeline.playerSliderView.currentIndex=i
+            //更新信号
             console.log("切换到轨道:",i,"  时间设为:",position)
 
             //_VP.player.source=timeline.playerSlider.source
@@ -74,4 +76,19 @@ function changePreviewBarListIndex(path,position){//采用遍历防止动态修�
             return
         }
     }
+}
+
+//删除一个预览条并删除对应切片
+function deleteOneSlider(sliderView,sdata){
+    let vUrl=sdata.get(sliderView.currentIndex).source
+    let cdata=videoList.cutView.thumbnailData
+
+    for(let i=0;i<cdata.count;i++){
+        if(vUrl===cdata.get(i).videoUrl){
+            //console.log("输出:",i)
+            cdata.remove(i);
+            i--;
+        }
+    }
+    sdata.remove(sliderView.currentIndex);
 }

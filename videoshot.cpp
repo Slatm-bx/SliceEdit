@@ -27,20 +27,13 @@ VideoShot::~VideoShot()
         if (a.joinable())
             a.join();
     }
-    std::cerr << "清除:" << m_outputPath.toStdString() << "\n";
-    QDir dir(m_outputPath);
-    if (dir.exists(m_outputPath)) {
-        if (dir.removeRecursively())
-            std::cerr << "缓存清除！\n";
-        else
-            std::cerr << "缓存清除失败\n";
-    }
 }
 
 void VideoShot::shot(
     QUrl source, int num, QString outputPath)
 {
     m_lock.lock();
+
     AVFormatContext *fmt_ctx{nullptr};                   //必须为空，不然第29秒后就炸
     AVCodecContext *dec_ctx{nullptr}, *enc_ctx{nullptr}; //解编码上下文
     SwsContext *sws_ctx{nullptr};                        //色彩转换
