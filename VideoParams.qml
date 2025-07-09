@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import QtMultimedia
 
 ColumnLayout{
+    property alias vpp:videoProperties
     spacing:0
     Rectangle{
         id:_atritext
@@ -22,12 +23,13 @@ ColumnLayout{
     Rectangle {
         id: videoProperties
         width: root.width / 5
-        height: (2 * root.height) / 3 - _atritext.height
+        // height: (2 * root.height) / 3 - _atritext.height
+        Layout.preferredHeight:(2 * root.height) / 3 - _atritext.height
         Layout.fillWidth: true
         Layout.fillHeight: true
         border.color: "#555"
         color: "#333"
-        clip: true
+        // clip: true
         ColumnLayout {
             anchors.margins: 12
             spacing: 16

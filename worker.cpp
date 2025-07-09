@@ -132,13 +132,11 @@ void Worker::cutOneVideo(double startime,
     av_packet_free(&pkt);
 }
 
-void Worker::saveAllVideos(const QVariantList &startTimes, const QVariantList &endTimes, QUrl inName, QString outName)
+void Worker::saveAllVideos(const QVariantList &startTimes,
+                           const QVariantList &endTimes,
+                           const QList<QUrl> &inNames,
+                           QString outName)
 {
-    QString localFile = inName.toLocalFile();
-
-    //  使用QFileInfo提取后缀
-    QFileInfo fileInfo(localFile);
-    QString suffix = fileInfo.suffix();
 
     std::string outfileName = outName.toStdString();
     std::cout << outfileName << '\n';
@@ -159,26 +157,50 @@ void Worker::saveAllVideos(const QVariantList &startTimes, const QVariantList &e
 
     QVector<QString> outputFiles; // 用于存储生成的剪辑文件名
     for (int i = 0; i < stimes.count(); i++) {
-        QString oneoutfilename = QString::fromStdString(clipsOutFile) + "clip" + QString::number(i) + "." + suffix;
-        cutOneVideo(stimes[i], etimes[i], inName, oneoutfilename);
+        QString localFile = inNames[i].toLocalFile();
+
+        //  使用QFileInfo提取后缀
+        QFileInfo fileInfo(localFile);
+        QString suffix1 = fileInfo.suffix();
+        QString oneoutfilename = QString::fromStdString(clipsOutFile) + "clip" + QString::number(i) + "." + suffix1;
+        cutOneVideo(stimes[i], etimes[i], inNames[i], oneoutfilename);
         outputFiles.append(oneoutfilename); // 记录生成的文件名
     }
 
+    // for (int i = 0; i < outputFiles.count(); i++) {
+    //     QString originalFile = outputFiles[i];
+    //     QFileInfo fileInfo(originalFile);
+
+    //     // 检查后缀是否是mp4（不区分大小写）
+    //     if (fileInfo.suffix().toLower() != "mp4") {
+    //         QString mp4File = fileInfo.path() + "/" + fileInfo.completeBaseName() + ".mp4";
+
+    //         // 转换视频为MP4格式
+    //         VideoAviToMp4(mp4File.toStdString(), originalFile.toStdString());
+
+    //         // 删除原始文件
+    //         QFile::remove(originalFile);
+
+    //         // 更新outputFiles中的文件名
+    //         outputFiles[i] = mp4File;
+    //     }
+    // }
+
     std::vector<std::string> input_files;
 
-    for (const QString &filename : outputFiles) {
-        input_files.push_back(filename.toStdString());
+    for (auto it = outputFiles.constBegin(); it != outputFiles.constEnd(); ++it) {
+        input_files.push_back(it->toStdString());
     }
 
-    for (const std::string &filename : input_files) {
-        std::cout << filename << '\n';
-    }
-    // 调用函数合并视频
-    if (isSaveAllVideo(outfileName, input_files)) {
-        std::cout << "操作成功！" << std::endl;
-    } else {
-        std::cerr << "操作失败！" << std::endl;
-    }
+        for (const std::string &filename : input_files) {
+            std::cout << filename << '\n';
+        }
+        // 调用函数合并视频
+        if (isSaveAllVideo(outfileName, input_files)) {
+            std::cout << "操作成功！" << std::endl;
+        } else {
+            std::cerr << "操作失败！" << std::endl;
+        }
 }
 
 bool Worker::isSaveAllVideo(const std::string &output_filename, const std::vector<std::string> &input_files)
@@ -211,4 +233,20 @@ bool Worker::isSaveAllVideo(const std::string &output_filename, const std::vecto
     std::remove("filelist.txt");
     std::cout << "视频合并成功: " << output_filename << std::endl;
     return true;
+}
+
+void Worker::VideoAviToMp4(const std::string &outputPath, const std::string &inputPath)
+{
+    std::string command = "ffmpeg -i " + inputPath + " " + outputPath;
+
+    // 执行命令
+    std::cout << "执行命令: " << command << std::endl;
+    int result = std::system(command.c_str());
+
+    // 检查执行结果
+    if (result == 0) {
+        std::cout << "FFmpeg命令执行成功!" << std::endl;
+    } else {
+        std::cout << "FFmpeg命令执行失败，返回码: " << result << std::endl;
+    }
 }
