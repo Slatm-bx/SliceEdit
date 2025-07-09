@@ -1,3 +1,5 @@
+//单个视频预览条
+
 import QtQuick
 import QtQuick.Controls
 import QtQml
@@ -6,6 +8,7 @@ import Videoedit
 Slider {
     property url source
     property int imageNum
+    property int videotime
     property string outputPath
     property string outputName
 
@@ -20,21 +23,28 @@ Slider {
         width: playerSlider.width
         height: playerSlider.height
         radius: 2
-        color: "white"
+        color: "#444"
         opacity : 1
-        border.color: timeline.playerSliderView.currentIndex===index?"#3f3":"black"
-        border.width: 4
 
         Text {
+            visible: _dataModel.count===0
             anchors.centerIn: parent
             id: emptyText
-            color: "black"
+            color: "white"
             text: {
                 if(source=="")return "无视频"
                 else return "正在加载";
             }
         }
     }
+    Rectangle{
+        z: 3
+        anchors.fill: parent
+        color: "transparent"
+        border.color: timeline.playerSliderView.currentIndex===index?"#1df":"black"
+        border.width: 4
+    }
+
     Text{
         z:4
         anchors.top:parent.top
@@ -48,7 +58,6 @@ Slider {
         styleColor: "black"
         font.pixelSize:20
     }
-
     property alias playhead:_playhead
     handle: Rectangle {
         id: _playhead
@@ -59,6 +68,18 @@ Slider {
     property alias imageList:_imageList
     property alias dataModel:_dataModel
 
+    function timeToTime(num){//时间转换字符串
+        let totals=videotime*(num+1)/2/imageNum
+        let s=Math.floor(totals%60)
+        let m=Math.floor((totals/60)%60)
+        let h=Math.floor(totals/3600)
+        if(h<10)h="0"+h
+        if(m<10)m="0"+m
+        if(s<10)s="0"+s
+
+        return h+":"+m+":"+s
+    }
+
     ListView{
         id:_imageList
         z:-2
@@ -68,13 +89,57 @@ Slider {
         }
         delegate:Component {
             id: segment
-            Image {
-                width:200
-                height:150
-                id:thumbnail
-                cache: false
-                fillMode : Image.PreserveAspectFit
-                source:model.pictureUrl
+            Item{
+                width: 200
+                height: 150
+                Image {
+                    width:200
+                    height:150
+                    id:thumbnail
+                    cache: false
+                    fillMode : Image.PreserveAspectFit
+                    source:model.pictureUrl
+                    clip: true
+                    Text {
+                        id: stamptime1
+                        color: "white"
+                        style: Text.Outline
+                        styleColor: "black"
+
+
+                        text: timeToTime(index*2)
+                        anchors.bottom: parent.bottom
+                        anchors.right: stamp1.left
+                    }
+                    Rectangle{
+                        id:stamp1
+                        height: 15
+                        width: 2
+                        color: "white"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+
+                    }
+                    Text {
+                        id: stamptime2
+                        color: "white"
+                        style: Text.Outline
+                        styleColor: "black"
+
+                        text: timeToTime(index*2+1)
+                        anchors.bottom: parent.bottom
+                        anchors.right: stamp2.left
+                    }
+                    Rectangle{
+                        id:stamp2
+                        height: 20
+                        width: 2
+                        color: "white"
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+
+                    }
+                }
             }
         }
         orientation:ListView.Horizontal
@@ -103,16 +168,19 @@ Slider {
             let lastIndex=source.toString().lastIndexOf("/")
             let fileName=source.toString().substring(lastIndex+1);
             lastIndex=fileName.lastIndexOf(".")
-            outputPath=tmpPath()+"/VideoShot/";
+            outputPath=tmpPath()+"/SliceEdit/";
             outputName=outputPath+fileName.substring(0,lastIndex-1)+fileName.substring(lastIndex+1)+"_"
         }
 
 
-        onShotFinished: {
+        onShotFinished: function(time){//接收信号数据
+            videotime=time
+            console.log("qml中时间:",videotime)
             dataModel.clear()
             for(let i=0;i<imageNum;i++){
                 dataModel.append({"pictureUrl":"file://"+outputName+"frame"+i+".jpg"});
             }
+
         }
     }
 

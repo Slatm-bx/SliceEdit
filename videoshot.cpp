@@ -15,7 +15,7 @@ VideoShot::VideoShot(
     : QObject{parent}
 
 {
-    m_outputPath = QDir::tempPath() + "/VideoShot/";
+    m_outputPath = QDir::tempPath() + "/SliceEdit/";
     QDir dir;
     if (!dir.exists(m_outputPath))
         dir.mkdir(m_outputPath);
@@ -40,7 +40,7 @@ VideoShot::~VideoShot()
 void VideoShot::shot(
     QUrl source, int num, QString outputPath)
 {
-    m_lock.lock();
+    //m_lock.lock();
     AVFormatContext *fmt_ctx{nullptr};                   //必须为空，不然第29秒后就炸
     AVCodecContext *dec_ctx{nullptr}, *enc_ctx{nullptr}; //解编码上下文
     SwsContext *sws_ctx{nullptr};                        //色彩转换
@@ -91,9 +91,12 @@ void VideoShot::shot(
     AVCodecParameters *codec_par{nullptr};
     codec_par = fmt_ctx->streams[videoIndex]->codecpar;
     const AVCodec *dec_codec{nullptr};
+
     dec_codec = avcodec_find_decoder(codec_par->codec_id);
     dec_ctx = avcodec_alloc_context3(dec_codec);
+
     avcodec_parameters_to_context(dec_ctx, codec_par);
+    //dec_ctx->hw_device_ctx = NULL;
 
     if (avcodec_open2(dec_ctx, dec_codec, nullptr) < 0) {
         std::cerr << "无法打开解码器\n";
@@ -227,11 +230,10 @@ void VideoShot::shot(
     avcodec_free_context(&dec_ctx);
     avcodec_free_context(&enc_ctx);
     avformat_close_input(&fmt_ctx);
-    emit shotFinished();
-    m_lock.unlock();
+    emit shotFinished((int) totaltime);
+    //m_lock.unlock();
     std::cerr << "截图结束\n";
 }
-
 void VideoShot::shotThread(
     QUrl source, int num, QString outputPath)
 {

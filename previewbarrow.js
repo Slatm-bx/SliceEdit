@@ -75,3 +75,11 @@ function changePreviewBarListIndex(path,position){//采用遍历防止动态修�
         }
     }
 }
+
+function sameFile(path){
+    for(let i=0;i!==timeline.playerSliderModel.count;i++){
+        let item=timeline.playerSliderModel.get(i)
+        if(item.source===path)return true
+    }
+    return false
+}
