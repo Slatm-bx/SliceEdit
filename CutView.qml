@@ -77,10 +77,16 @@ Rectangle{
             TapHandler{
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onTapped: (eventPoint,button)=>{
-                    cutListView.currentIndex = index;
-                    //更新播放位置
-                    videoPlayer.player.position=model.startTime;
-                }
+                              cutListView.currentIndex = index;
+                              //更新播放位置
+
+                              if(videoPlayer.player.source!==model.videoUrl){
+                                  videoPlayer.player.source=model.videoUrl
+                                  PreviewBarRowControl.changePreviewBarListIndex(model.videoUrl,model.startTime)
+                              }
+                              else videoPlayer.player.position=model.startTime;
+                          }
+
             }
             ContextMenu.menu: cMenu
         }
@@ -101,8 +107,9 @@ Rectangle{
                     thumbnailData.remove(cutListView.currentIndex);
                     timeline.playerSlider.tmpCut.startTime=0;
                 }else{
-                    PreviewBarRowControl.deleteOneCutFunction(data.cutId)
+                    PreviewBarRowControl.deleteOneCutFunction(data.videoUrl,data.cutId)
                     thumbnailData.remove(cutListView.currentIndex);
+
                 }
             }
         }
@@ -204,7 +211,7 @@ Rectangle{
                                     thumbnailData.remove(cutListView.currentIndex);
                                     timeline.playerSlider.tmpCut.startTime=0;
                                 }else{
-                                    PreviewBarRowControl.deleteOneCutFunction(data.cutId)
+                                    PreviewBarRowControl.deleteOneCutFunction(data.videoUrl,data.cutId)
                                     thumbnailData.remove(cutListView.currentIndex);
                                 }
                             }
@@ -215,7 +222,7 @@ Rectangle{
                                 for(let i=0;i<cutListView.count;i++){
                                     data=thumbnailData.get(i);
                                     //如果红色矩形存在
-                                    if(data.endTime!==-1)PreviewBarRowControl.deleteOneCutFunction(data.cutId);
+                                    if(data.endTime!==-1)PreviewBarRowControl.deleteOneCutFunction(data.videoUrl,data.cutId);
                                     else {
                                         timeline.playerSlider.tmpCut.visible=false;
                                         //恢复未切片状态

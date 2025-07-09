@@ -14,7 +14,12 @@ VideoShot::VideoShot(
     QObject *parent)
     : QObject{parent}
 
-{}
+{
+    m_outputPath = QDir::tempPath() + "/VideoShot/";
+    QDir dir;
+    if (!dir.exists(m_outputPath))
+        dir.mkdir(m_outputPath);
+}
 
 VideoShot::~VideoShot()
 {
@@ -22,6 +27,7 @@ VideoShot::~VideoShot()
         if (a.joinable())
             a.join();
     }
+    std::cerr << "清除:" << m_outputPath.toStdString() << "\n";
     QDir dir(m_outputPath);
     if (dir.exists(m_outputPath)) {
         if (dir.removeRecursively())
@@ -55,10 +61,6 @@ void VideoShot::shot(
         std::cerr << "指定数量不能小于等于0\n";
         return;
     }
-
-    QDir dir;
-    if (!dir.exists(outputPath))
-        dir.mkdir(outputPath);
 
     std::cerr << "开始截图\n输入路径:" << source.toLocalFile().toStdString() << "\n数量:" << num
               << "\n输出路径:" << outputPath.toStdString() << "\n";
@@ -233,7 +235,6 @@ void VideoShot::shot(
 void VideoShot::shotThread(
     QUrl source, int num, QString outputPath)
 {
-    m_outputPath = outputPath;
     if (source.isEmpty()) {
         std::cerr << "输入文件为空\n";
         return;

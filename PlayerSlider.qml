@@ -7,24 +7,24 @@ Slider {
     property url source
     property int imageNum
     property string outputPath
+    property string outputName
 
     id: playerSlider
-    width: {
-        Math.floor(parent.width/200)*200
-    }
+    width: Math.floor(parent.width/200)*200
 
     height:150
-    value: 0.5
+    value: 0
     background: Rectangle {
         id:overallProgress
-        // x: playerSlider.leftPadding
-        // y: playerSlider.topPadding + playerSlider.availableHeight / 2 - height / 2
         z:-3
         width: playerSlider.width
         height: playerSlider.height
         radius: 2
         color: "white"
         opacity : 1
+        border.color: timeline.playerSliderView.currentIndex===index?"#3f3":"black"
+        border.width: 4
+
         Text {
             anchors.centerIn: parent
             id: emptyText
@@ -35,15 +35,20 @@ Slider {
             }
         }
     }
+    Text{
+        z:4
+        anchors.top:parent.top
+        anchors.left: parent.left
+        anchors.margins: 4
+        text: {
+            return "视频:"+source.toString().substring(7)
+        }
+        color: "white"
+        style: Text.Outline
+        styleColor: "black"
+        font.pixelSize:20
+    }
 
-    // Rectangle {
-    //     id:progress
-    //     opacity : 0.3
-    //     width: playerSlider.visualPosition * parent.width
-    //     height: parent.height
-    //     color:"red"
-    //     radius: 2
-    // }
     property alias playhead:_playhead
     handle: Rectangle {
         id: _playhead
@@ -86,7 +91,8 @@ Slider {
         interval: 1000
         repeat: false
         onTriggered: {
-            if(source!="")_videoshot.shotThread(source,imageNum,outputPath)
+            console.log(source,imageNum,outputName)
+            if(source!="")_videoshot.shotThread(source,imageNum,outputName)
         }
     }
 
@@ -94,21 +100,26 @@ Slider {
     VideoShot{//视频预览图
         id:_videoshot
         Component.onCompleted: {
+            let lastIndex=source.toString().lastIndexOf("/")
+            let fileName=source.toString().substring(lastIndex+1);
+            lastIndex=fileName.lastIndexOf(".")
             outputPath=tmpPath()+"/VideoShot/";
+            outputName=outputPath+fileName.substring(0,lastIndex-1)+fileName.substring(lastIndex+1)+"_"
         }
 
 
         onShotFinished: {
             dataModel.clear()
             for(let i=0;i<imageNum;i++){
-                dataModel.append({"pictureUrl":"file://"+outputPath+"frame"+i+".jpg"});
+                dataModel.append({"pictureUrl":"file://"+outputName+"frame"+i+".jpg"});
             }
         }
     }
 
     onSourceChanged: {
         if(imageNum>0){
-            _videoshot.shotThread(source,imageNum,outputPath)
+            console.log(source,imageNum,outputName)
+            _videoshot.shotThread(source,imageNum,outputName)
         }
     }
 
@@ -138,5 +149,9 @@ Slider {
         //property int cutNum: 0//让他绑定到_stratCutButton的count属性。
         property int cutNum: lrow.stratCutButton.count
         property var cuts:({})
+    }
+
+    Component.onCompleted: {
+        console.log("width:",width," height:",height)
     }
 }

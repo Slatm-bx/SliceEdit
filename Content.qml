@@ -45,8 +45,9 @@ Item {
                 dialogs{
                     fileOpen{
                         onAccepted: {
-                            _VP.player.stop()
-                            _timeline.playerSlider.source=dialogs.fileOpen.selectedFile
+                            // _VP.player.stop()
+                            // _timeline.playerSlider.source=dialogs.fileOpen.selectedFile
+                            timeline.playerSliderModel.append({"source":dialogs.fileOpen.selectedFile});
                         }
                     }
                     saveClipDialog{
@@ -81,6 +82,7 @@ Item {
                             for(let i =0;i<data.count;i++){
                                 stimes.push(data.get(i).startTime/1000);
                                 etimes.push(data.get(i).endTime/1000);
+
                                 inFileNames.push(data.get(i).videoUrl);
                             }
                             let outFileName = String(outName.replace("file://", ""));
@@ -88,6 +90,7 @@ Item {
                         }
                     }
                 }
+
             }
 
             VideoParams{
@@ -106,39 +109,59 @@ Item {
                 onClicked:PreviewBarRowControl.startCutFunction()
             }
             endCutButton{
-                onClicked: PreviewBarRowControl.endCutFunction()
+                onClicked:PreviewBarRowControl.endCutFunction()
             }
         }
 
         PreviewBarRow{
             id: _timeline
+
             Layout.preferredHeight:(2*root.height)/5 - parent.spacing - _lrow.height
-            // height: (2*root.height)/5 - parent.spacing - _lrow.height
             width:parent.width
-            playerSlider{
-                videoshot{
-                    onShotFinished: {//截图后再加载视频 反过来不好处理
-                        _VP.player.source=playerSlider.source
+
+            playerSliderView{
+                delegate: PlayerSlider{// 改到content内
+                    source: model.source
+                    onMoved: {
+
+                        if(_VP.player.source===source){
+                            _VP.player.position=timeline.playerSlider.value;
+                        }
+                        else{
+                            if(lrow.stratCutButton.enabled){
+                                //切换轨道
+                                //解除旧绑定
+                                timeline.playerSlider.value=timeline.playerSlider.value
+                                timeline.playerSlider.to=timeline.playerSlider.to
+
+                                timeline.playerSliderView.currentIndex=index
+
+                                console.log("切换到轨道:",index)
+                                //_VP.player.source=source
+                                //_VP.player.position=timeline.playerSlider.value
+                                // timeline.playerSlider.value=Qt.binding(function(){return _VP.player.position})
+                                // timeline.playerSlider.to=Qt.binding(function(){return _VP.player.duration})
+                                // _VP.player.play()
+                            }
+                        }
+                    }
+                }
+                onCurrentIndexChanged: {//修改轨道位置 content PreviewBarRow
+                    if(timeline.playerSliderView.count>=1){
+                        console.log("修改绑定")
+
+                        _VP.player.source=timeline.playerSlider.source
+                        _VP.player.position=timeline.playerSlider.value
+                        //_VP.player.source=Qt.binding(function(){return timeline.playerSlider.source})
+
+                        console.log(timeline.playerSlider.source);
+                        timeline.playerSlider.value=Qt.binding(function(){return _VP.player.position})
+                        timeline.playerSlider.to=Qt.binding(function(){return _VP.player.duration})
+
                         _VP.player.play()
                     }
                 }
-                to:_VP.player.duration
-                //value:_VP.player.position
-                value: Math.max(_VP.player.position,playerSlider.tmpCut.startTime)//? _VP.player.position:playerSlider.tmpCut.startTime
-                onMoved: {
-                    if(playerSlider.value<playerSlider.tmpCut.startTime){
-                        _VP.player.position=playerSlider.tmpCut.startTime;
-                        //playerSlider.value=playerSlider.tmpCut.startTime;
-                        //_VP.player.position=playerSlider.tmpCut.startTime;
-                    }else{
-                        _VP.player.position=playerSlider.value;
-                    }
-                    //if(timeline.playerSlider.tmpCut.startTime>playerSlider.value)PreviewBarRowControl.endCutFunction()
-                }
-                enabled: _VP.player.source!=""
-                // onSourceChanged: {
-                //     PreviewBarRowControl.clearCutFunction()
-                // }
+
             }
         }
     }
